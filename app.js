@@ -1,11 +1,23 @@
-import express from "express";
-import cors from "cors";
-import connection from "./db_config.js";
+const express = require("express");
+const cors = require("cors");
+
+const knex = require("knex");
+// const path = require("path");
+
+const db = knex({
+  client: 'mysql2',
+  connection: {
+    host     : process.env.DB_HOST,
+    user     : process.env.DB_USER,
+    password : process.env.DB_PASSWORD,
+    database : 'asig'
+  }
+});
 
 const app = express();
 const port = process.env.PORT || 3001;
 
-
+// connection();
 
 app.use(cors());
 app.use(express.json());
