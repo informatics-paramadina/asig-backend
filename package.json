@@ -7,7 +7,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
-  "author": "DOFX",
+  "author": "drdofx",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
@@ -16,6 +16,7 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.21",
-    "mysql2": "^2.3.0"
+    "mysql2": "^2.3.0",
+    "uuid": "^8.3.2"
   }
 }

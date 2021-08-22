@@ -12,6 +12,12 @@ module.exports = {
       password : process.env.DB_PASSWORD,
       database : 'asig'
     },
+    migrations: {
+      directory: 'db/migrations'
+    },
+    seeds: {
+      directory: 'db/seeds'
+    }
   },
 
   staging: {
@@ -27,7 +33,7 @@ module.exports = {
       max: 10
     },
     migrations: {
-      directory: 'migrations'
+      directory: 'db/migrations'
     }
   },
 
@@ -44,7 +50,7 @@ module.exports = {
       max: 10
     },
     migrations: {
-      directory: 'migrations'
+      directory: 'db/migrations'
     }
   }
 
