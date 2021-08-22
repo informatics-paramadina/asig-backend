@@ -22,6 +22,7 @@ app.use('/', [projectRoutes, usersRoutes]);
 app.use("*", (req, res) => res.status(404).send('<h1>Sorry, page not found!</h1>'));
 
 app.use(function errorHandler (err, req, res, next) {
+  if (err.message === "bad") res.status(400).send('failed');
   res.status(500).send(`<h1>Sorry, something is not right!</h1><p>${err}</p>`);
 })
 
