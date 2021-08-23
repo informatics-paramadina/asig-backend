@@ -15,7 +15,7 @@ router.post('/user', registerUsers);
 router.post('/admin', registerAdmin);
 router.post('/login', postLogin);
 router.get('/auth-test', authMiddleware, (req, res) => {
-    res.send(req.user.userRole);
+    res.send("success! your role is " + req.user.userRole);
 })
 router.get('/admin-test', authMiddleware, adminMiddleware, (req, res) => {
     res.send('you are an ' + req.user.userRole);

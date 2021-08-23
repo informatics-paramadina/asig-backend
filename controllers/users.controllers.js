@@ -48,81 +48,42 @@ const registerAdmin = async (req, res, next) => {
 };
 
 const postLogin = (req, res, next) => {
-    db.transaction(trx => {
-        return trx
-            .from('users')
-            .where({email: req.body.email})
-            .first()
-            .then(user => {
-                if (!user) throw new Error("bad");
-                console.log(user);
-                return bcrypt
-                        .compare(req.body.password, user.password)
-                        .then(auth => {
-                            if (!auth) throw new Error("bad");
+    db
+        .from('users')
+        .where({email: req.body.email})
+        .first()
+        .then(user => {
+            if (!user) throw Error('bad');
 
-                            const token = jwt.sign({ 
-                                userId: user.id,
-                                userEmail: user.email,
-                                userRole: user.role
-                            }, 
-                            'shhhhh',
-                            { expiresIn: "24h" });
-                            
-                            res.status(200).json({
-                                message: "Login success!",
-                                email: user.email,
-                                token,
-                                expiredAt: new Date(jwt.decode(token).exp * 1000)
-                            });
+            return bcrypt
+                    .compare(req.body.password, user.password)
+                    .then(auth => {
+                        if (!auth) throw Error('bad');
 
-                            return db('auth').insert({
-                                token: token,
-                                expired_at: new Date(jwt.decode(token).exp * 1000),
-                                user_id: user.id
-                            });
+                        const token = jwt.sign({ 
+                            userId: user.id,
+                            userEmail: user.email,
+                            userRole: user.role
+                        }, 
+                        'shhhhh',
+                        { expiresIn: "24h" });
+
+                        db('auth').insert({
+                            token: token,
+                            expired_at: new Date(jwt.decode(token).exp * 1000),
+                            user_id: user.id
+                        }).then();
+
+                        res.status(200).json({
+                            message: "Login success!",
+                            email: user.email,
+                            token,
+                            expiredAt: new Date(jwt.decode(token).exp * 1000)
                         })
-                        .catch(error => next(error));
-            })
-    })
-    .then(data => console.log(data.length))
-    .catch(error => next(error));
-    // db
-    //     .from('users')
-    //     .where({email: req.body.email})
-    //     .first()
-    //     .then(user => {
-    //         if (!user) return res.status(400).send("failed");
-    //         console.log(user);
-    //         return bcrypt
-    //                 .compare(req.body.password, user.password)
-    //                 .then(auth => {
-    //                     if (!auth) return res.status(400).send("failed");
-
-    //                     const token = jwt.sign({ 
-    //                         userId: user.id,
-    //                         userEmail: user.email,
-    //                         userRole: user.role
-    //                     }, 
-    //                     'shhhhh',
-    //                     { expiresIn: "24h" });
-
-    //                     db('auth').insert({
-    //                         token: token,
-    //                         expired_at: new Date(jwt.decode(token).exp * 1000),
-    //                         user_id: user.id
-    //                     }).then();
-
-    //                     res.status(200).json({
-    //                         message: "Login success!",
-    //                         email: user.email,
-    //                         token,
-    //                         expiredAt: new Date(jwt.decode(token).exp * 1000)
-    //                     })
-    //                 })
-    //                 .catch(error => next(error));
-    //     })
-    //     .catch(error => next(error));
+                    })
+                    .catch(error => next(error));
+        })
+        .catch(error => next(error));
 };
 
 module.exports = {
