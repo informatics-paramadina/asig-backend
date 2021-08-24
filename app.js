@@ -4,6 +4,7 @@ const cors = require("cors");
 const knex = require("knex");
 const projectRoutes = require("./routes/project.routes");
 const usersRoutes = require("./routes/users.routes");
+const teamRoutes = require("./routes/team.routes");
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -12,11 +13,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/images', express.static('images'));
+
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send(`
+    <h2>buat test</h2>
+    <p><strong>get:</strong> /test</p>
+    <p><strong>post:</strong> /test-upload (key=logo)</p>`)
 })
 
-app.use('/', [projectRoutes, usersRoutes]);
+app.use('/', [projectRoutes, usersRoutes, teamRoutes]);
 
 // wildcard 404
 app.use("*", (req, res) => res.status(404).send('<h1>Sorry, page not found!</h1>'));

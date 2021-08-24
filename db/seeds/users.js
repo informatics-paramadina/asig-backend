@@ -10,7 +10,7 @@ exports.seed = function(knex) {
         {
           uuid: uuidv4(),
           email: 'alex@gmail.com',
-          phone_number: '0872222112',
+          phone_number: '08722221123',
           name: 'alex',
           password: bcrypt.hashSync('alexalex123', 10),
           role: 'admin'
@@ -18,7 +18,7 @@ exports.seed = function(knex) {
         {
           uuid: uuidv4(),
           email: 'alex1@gmail.com',
-          phone_number: '0872222112',
+          phone_number: '08722221124',
           name: 'alex1',
           password: bcrypt.hashSync('alexalex123', 10),
           role: 'user'
@@ -26,7 +26,7 @@ exports.seed = function(knex) {
         {
           uuid: uuidv4(),
           email: 'alex2@gmail.com',
-          phone_number: '0872222112',
+          phone_number: '08722221125',
           name: 'alex2',
           password: bcrypt.hashSync('alexalex123', 10),
           role: 'player'

@@ -8,7 +8,7 @@ exports.up = function(knex) {
                 table.increments('id').primary();
                 table.string('uuid', 100).unique().notNullable();
                 table.string('email', 200).unique().notNullable();
-                table.string('phone_number', 25).notNullable();
+                table.string('phone_number', 25).unique().notNullable();
                 table.string('name', 255).notNullable();
                 table.string('password', 255).notNullable();
                 table.enu('role', ['admin', 'user', 'player']).notNullable();

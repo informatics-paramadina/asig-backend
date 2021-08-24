@@ -7,20 +7,20 @@ exports.seed = function(knex) {
       return knex('project').insert([
         {
           nama_project: 'project1',
-          creator: 'alex1',
-          project_link: 'https://knexjs.org/',
+          creator: 'tes',
+          project_link: 'https://paramadina.ac.id/',
           type: 'animasi'
         },
         {
           nama_project: 'project2',
-          creator: 'alex2',
-          project_link: 'https://knexjs.org/',
+          creator: 'tes',
+          project_link: 'https://paramadina.ac.id/',
           type: 'game'
         },
         {
           nama_project: 'project3',
-          creator: 'alex3',
-          project_link: 'https://knexjs.org/',
+          creator: 'tes',
+          project_link: 'https://paramadina.ac.id/',
           type: 'animasi'
         }
       ]);
