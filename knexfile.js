@@ -10,7 +10,7 @@ module.exports = {
       host     : process.env.DB_HOST,
       user     : process.env.DB_USER,
       password : process.env.DB_PASSWORD,
-      database : 'asig'
+      database : process.env.DB_NAME
     },
     migrations: {
       directory: 'db/migrations'
@@ -26,7 +26,7 @@ module.exports = {
       host     : process.env.DB_HOST,
       user     : process.env.DB_USER,
       password : process.env.DB_PASSWORD,
-      database : 'asig'
+      database : process.env.DB_NAME
     },
     pool: {
       min: 2,
@@ -34,6 +34,9 @@ module.exports = {
     },
     migrations: {
       directory: 'db/migrations'
+    },
+    seeds: {
+      directory: 'db/seeds'
     }
   },
 
@@ -43,7 +46,7 @@ module.exports = {
       host     : process.env.DB_HOST,
       user     : process.env.DB_USER,
       password : process.env.DB_PASSWORD,
-      database : 'asig'
+      database : process.env.DB_NAME
     },
     pool: {
       min: 2,
@@ -51,6 +54,9 @@ module.exports = {
     },
     migrations: {
       directory: 'db/migrations'
+    },
+    seeds: {
+      directory: 'db/seeds'
     }
   }
 
