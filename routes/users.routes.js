@@ -2,7 +2,9 @@ const express = require('express');
 const { 
     registerUsers, 
     registerAdmin, 
-    postLogin 
+    postLogin, 
+    updateUsers,
+    updatePresence
 } = require('../controllers/users.controllers');
 const {
     authMiddleware, 
@@ -15,11 +17,14 @@ router.post('/user', registerUsers);
 router.post('/admin', registerAdmin);
 router.post('/login', postLogin);
 router.get('/auth-test', authMiddleware, (req, res) => {
-    res.send("success! your role is " + req.user.userRole);
+    // res.send("success! your role is " + req.user.userRole);
+    res.send(req.user);
 })
 router.get('/admin-test', authMiddleware, adminMiddleware, (req, res) => {
     res.send('you are an ' + req.user.userRole);
 })
+router.put('/change', authMiddleware, updateUsers);
+router.put('/presence', authMiddleware, updatePresence);
 
 
 module.exports = router;

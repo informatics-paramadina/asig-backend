@@ -7,21 +7,61 @@ const registerUsers = async (req, res, next) => {
     let checkEmail = await db.from('users').where({email: req.body.email}).select('email');
     if (checkEmail.length === 1) return res.status(400).send('email already exists');
 
-    bcrypt.hash(req.body.password, 10)
-        .then(hash => {
-            return db('users').insert({
-                uuid: uuidv4(),
-                email: req.body.email,
-                phone_number: req.body.phone_number,
-                name: req.body.name,
-                password: hash,
-                role: req.body.role === 'admin' ? 'user' : req.body.role
+    db.transaction(trx => {
+        bcrypt.hash(req.body.password, 10)
+            .then(hash => {
+                if (req.body.role === 'user') {
+                    db
+                        .insert({
+                            uuid: uuidv4(),
+                            email: req.body.email,
+                            phone_number: req.body.phone_number,
+                            name: req.body.name,
+                            password: hash,
+                            role: req.body.role
+                        })
+                        .into('users')
+                        .transacting(trx)
+                        .then(id_user => {
+                            const getUUID = db('users').where({id: id_user[0]}).select('uuid');
+                            return db('presence').insert({'user_uuid': getUUID}).transacting(trx);
+                        })
+                        .then(trx.commit)
+                        .catch(trx.rollback);
+                } else {
+                    db
+                        .insert({
+                            uuid: uuidv4(),
+                            email: req.body.email,
+                            phone_number: req.body.phone_number,
+                            name: req.body.name,
+                            password: hash,
+                            role: req.body.role
+                        })
+                        .into('users')
+                        .transacting(trx)
+                        .then(trx.commit)
+                        .catch(trx.rollback);
+                }
             })
+            .catch(error => next(error));
         })
-        .then(() => {
-            res.status(201).json({ status: "user registered succcessfully" });
-        })
-        .catch(error => next(error));
+        
+    .then((id) => {
+        if (req.body.role !== 'user') {
+            return res.status(201).json({
+                status: "user registered succcessfully",
+            });
+        } else {
+            db('presence').where({id: id[0]}).select('user_uuid').then(data => {
+                res.status(201).json({
+                    status: "user registered succcessfully",
+                    uuid: data[0].user_uuid
+                });
+            })
+        }
+    })
+    .catch(error => next(error));
 };
 
 const registerAdmin = async (req, res, next) => {
@@ -46,6 +86,21 @@ const registerAdmin = async (req, res, next) => {
         })
         .catch(error => next(error));
 };
+
+const updateUsers = (req, res, next) => {
+    if (req.body.name) {
+        db
+            .from('users')
+            .where({ id: req.user.userId })
+            .update({ name: req.body.name, updated_at: new Date() })
+            .then(() => {
+                res.status(200).json({ status: "user updated succcessfully" })
+            })
+            .catch(error => next(error));
+    } else {
+        throw Error('bad');
+    }
+}
 
 const postLogin = (req, res, next) => {
     db
@@ -86,8 +141,43 @@ const postLogin = (req, res, next) => {
         .catch(error => next(error));
 };
 
+const updatePresence = (req, res, next) => {
+    if (req.body.is_present) {
+        db
+            .from('users')
+            .whereRaw('users.id = ?', [req.user.userId])
+            .join('presence', 'users.uuid', 'presence.user_uuid')
+            .update({ 
+                "presence.is_present": req.body.is_present == true ? 1 : 1,
+                "presence.present_at": req.body.present_at ? req.body.present_at : new Date(), 
+                "presence.updated_at": new Date() 
+            })
+            .then(() => {
+                res.status(200).json({ status: "user presence updated succcessfully" })
+            })
+            .catch(error => next(error));
+    } else if (req.body.uuid) {
+        db
+            .from('presence')
+            .where({ user_uuid: req.body.uuid })
+            .update({
+                "is_present": req.body.is_present == true ? 1 : 1,
+                "present_at": req.body.present_at ? req.body.present_at : new Date(), 
+                "updated_at": new Date() 
+            })
+            .then(() => {
+                res.status(200).json({ status: "user presence updated succcessfully" })
+            })
+            .catch(error => next(error));
+    } else {
+        throw Error('bad');
+    }
+}
+
 module.exports = {
     registerUsers,
     registerAdmin,
-    postLogin
+    updateUsers,
+    postLogin,
+    updatePresence
 };
