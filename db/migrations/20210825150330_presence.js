@@ -10,7 +10,7 @@ exports.up = function(knex) {
                 table.timestamp('present_at');
                 //ref
                 table.string('user_uuid', 100).notNullable();
-                table.foreign('user_uuid').references('uuid').inTable('users').onUpdate('CASCADE').onDelete('CASCADE');
+                table.foreign('user_uuid').references('uuid').inTable('talkshow').onUpdate('CASCADE').onDelete('CASCADE');
                 table.timestamps(true, true);
             });
     });

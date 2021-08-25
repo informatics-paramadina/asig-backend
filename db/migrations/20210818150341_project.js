@@ -8,6 +8,7 @@ exports.up = function(knex) {
                 table.increments('id').primary();
                 table.string('nama_project', 255).notNullable();
                 table.string('creator', 255).notNullable();
+                table.text('description', 'longtext');
                 table.string('project_link', 255).notNullable();
                 table.enu('type', ['animasi', 'game']).notNullable(); // bisa juga string, belom tau
 

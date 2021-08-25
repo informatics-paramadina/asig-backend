@@ -1,7 +1,8 @@
 const express = require('express');
-const { getProjects } = require('../controllers/project.controllers');
+const { getGameProjects, getAnimationProjects } = require('../controllers/project.controllers');
 const router = express.Router();
 
-router.get('/test', getProjects);
+router.get('/game-project', getGameProjects);
+router.get('/animation-project', getAnimationProjects);
 
 module.exports = router;

@@ -11,7 +11,11 @@ exports.up = function(knex) {
                 table.timestamp('start_at');
                 //ref
                 table.integer('created_by').unsigned().notNullable();
+                table.integer('team_id_1').unsigned().notNullable();
+                table.integer('team_id_2').unsigned().notNullable();
                 table.foreign('created_by').references('id').inTable('users').onUpdate('CASCADE').onDelete('CASCADE');
+                table.foreign('team_id_1').references('id').inTable('team').onUpdate('CASCADE').onDelete('CASCADE');
+                table.foreign('team_id_2').references('id').inTable('team').onUpdate('CASCADE').onDelete('CASCADE');
                 table.timestamps(true, true);
             });
     });

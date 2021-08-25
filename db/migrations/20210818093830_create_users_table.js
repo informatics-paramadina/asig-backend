@@ -6,12 +6,11 @@ exports.up = function(knex) {
         return knex.schema
             .createTable('users', function(table) {
                 table.increments('id').primary();
-                table.string('uuid', 100).unique().notNullable();
                 table.string('email', 200).unique().notNullable();
                 table.string('phone_number', 25).unique().notNullable();
                 table.string('name', 255).notNullable();
                 table.string('password', 255).notNullable();
-                table.enu('role', ['admin', 'user', 'player']).notNullable();
+                table.enu('role', ['admin', 'user']).notNullable();
                 table.timestamps(true, true);
             });
     });

@@ -4,7 +4,7 @@ const cors = require("cors");
 const knex = require("knex");
 const projectRoutes = require("./routes/project.routes");
 const usersRoutes = require("./routes/users.routes");
-const teamRoutes = require("./routes/team.routes");
+const eventRoutes = require("./routes/event.routes");
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
     <p><strong>post:</strong> /test-upload (key=logo)</p>`)
 })
 
-app.use('/', [projectRoutes, usersRoutes, teamRoutes]);
+app.use('/', [projectRoutes, usersRoutes, eventRoutes]);
 
 // wildcard 404
 app.use("*", (req, res) => res.status(404).send('<h1>Sorry, page not found!</h1>'));
