@@ -14,10 +14,15 @@ const uploadLogo = (req, res, next) => {
 
 const registerGame = (req, res, next) => {
     db.transaction(trx => {
-        const halfUrl = req.protocol + '://' + req.get('host') + '/';
-        const fullUrl = halfUrl + req.file.path.replace(/\\/g, "/");
+        let fullUrl;
 
+        if (req.file) {
+            const halfUrl = req.protocol + '://' + req.get('host') + '/';
+            fullUrl = halfUrl + req.file.path.replace(/\\/g, "/");
+        }
+            
         const members = [];
+        // console.log(req.body.name.length)
         const dataLength = req.body.name.length;
         
         for (let i=0; i<dataLength; i++) {
@@ -90,7 +95,7 @@ const registerTalkshow = (req, res, next) => {
                 url: 'https://wa.bot.ghifar.dev/sendText',
                 body: JSON.stringify({
                     "user_id": process.env.WA_ID,
-                    "number": "",
+                    "number": process.env.WA_NUMBER,
                     "message": `Terima kasih telah mendaftar Talkshow ASIG 14!
                     ID Pendaftaran Anda: ${data[0].user_uuid}
                     simpan ID Pendaftaran sebagai langkah untuk memverifikasi presensi Anda dalam Talkshow.`

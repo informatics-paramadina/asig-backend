@@ -78,7 +78,8 @@ const postLogin = (req, res, next) => {
                         const token = jwt.sign({ 
                             userId: user.id,
                             userEmail: user.email,
-                            userRole: user.role
+                            userRole: user.role,
+                            userName: user.name
                         }, 
                         'shhhhh',
                         { expiresIn: "3d" });
