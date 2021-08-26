@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const registerUsers = async (req, res, next) => {
     let checkEmail = await db.from('users').where({email: req.body.email}).select('email');
     let checkPhone = await db.from('users').where({phone_number: req.body.phone_number}).select('phone_number');
-    if (checkEmail.length === 1 || checkPhone.length === 1) return res.status(400).json({status: "email or phone number already exists"})
+    if (checkEmail.length > 0 || checkPhone.length > 0) return res.status(400).json({status: "email or phone number already exists"})
 
     bcrypt.hash(req.body.password, 10)
         .then(hash => {
@@ -29,7 +29,7 @@ const registerAdmin = async (req, res, next) => {
 
     let checkEmail = await db.from('users').where({email: req.body.email}).select('email');
     let checkPhone = await db.from('users').where({phone_number: req.body.phone_number}).select('phone_number');
-    if (checkEmail.length === 1 || checkPhone.length === 1) return res.status(400).json({status: "email or phone number already exists"});
+    if (checkEmail.length > 0 || checkPhone.length > 0) return res.status(400).json({status: "email or phone number already exists"});
 
     bcrypt.hash(req.body.password, 10)
         .then(hash => {

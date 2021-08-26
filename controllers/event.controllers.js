@@ -12,7 +12,14 @@ const uploadLogo = (req, res, next) => {
     }
 };
 
-const registerGame = (req, res, next) => {
+const registerGame = async (req, res, next) => {
+    let checkUser = 
+        await db("users")
+                .join('team', 'team.leader_id', 'users.id')
+                .whereRaw('users.id = ?', [req.user.userId])
+                .select();
+    if (checkUser.length > 0) return res.status(400).json({status: "user has already registered to participate in game event"})
+
     db.transaction(trx => {
         let fullUrl;
 
@@ -56,7 +63,14 @@ const registerGame = (req, res, next) => {
     .catch(error => next(error));
 }
 
-const registerMinigame = (req, res, next) => {
+const registerMinigame = async (req, res, next) => {
+    let checkUser = 
+        await db("users")
+                .join('minigame', 'minigame.user_id', 'users.id')
+                .whereRaw('users.id = ?', [req.user.userId])
+                .select();
+    if (checkUser.length > 0) return res.status(400).json({status: "user has already registered to participate in minigame event"})
+
     db('minigame')
         .insert({
             name_ingame: req.body.name_ingame,
@@ -70,7 +84,14 @@ const registerMinigame = (req, res, next) => {
         .catch(error => next(error));
 }
 
-const registerTalkshow = (req, res, next) => {
+const registerTalkshow = async (req, res, next) => {
+    let checkUser = 
+        await db("users")
+                .join('talkshow', 'talkshow.user_id', 'users.id')
+                .whereRaw('users.id = ?', [req.user.userId])
+                .select();
+    if (checkUser.length > 0) return res.status(400).json({status: "user has already registered to attend the talkshow"})
+
     db.transaction(trx => {
         db
             .insert({
@@ -90,27 +111,55 @@ const registerTalkshow = (req, res, next) => {
             .catch(trx.rollback);
     })    
     .then((id) => {
-        db('presence').where({id: id[0]}).select('user_uuid').then(data => {
-            request.post({
-                url: 'https://wa.bot.ghifar.dev/sendText',
-                body: JSON.stringify({
-                    "user_id": process.env.WA_ID,
-                    "number": process.env.WA_NUMBER,
-                    "message": `Terima kasih telah mendaftar Talkshow ASIG 14!
-                    ID Pendaftaran Anda: ${data[0].user_uuid}
-                    simpan ID Pendaftaran sebagai langkah untuk memverifikasi presensi Anda dalam Talkshow.`
-                }),
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization": process.env.WA_AUTH
-                }
+        db('presence')
+            .join('talkshow', 'talkshow.uuid', 'presence.user_uuid')
+            .join('users', 'users.id', 'talkshow.user_id')
+            .whereRaw('presence.id = ?', [id[0]])
+            .select('users.phone_number', 'presence.user_uuid')
+            .then(data => {
+                request.post({
+                    url: 'https://wa.bot.ghifar.dev/sendText',
+                    body: JSON.stringify({
+                        "user_id": process.env.WA_ID,
+                        "number": data[0].phone_number,
+                        "message": "Terima kasih telah mendaftar Talkshow ASIG 14!\n\n" 
+                        + "ID Pendaftaran Anda: " + data[0].user_uuid + "\n\n"
+                        + "Simpan ID Pendaftaran sebagai langkah untuk memverifikasi presensi Anda dalam Talkshow."
+                    }),
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": process.env.WA_AUTH
+                    }
+                })
+                res.status(201).json({
+                    status: "success",
+                    uuid: data[0].user_uuid
+                });
             })
-            res.status(201).json({
-                status: "success",
-                uuid: data[0].user_uuid
-            });
-        })
+
+
+        // db('presence').where({id: id[0]}).select('user_uuid').then(data => {
+        //     request.post({
+        //         url: 'https://wa.bot.ghifar.dev/sendText',
+        //         body: JSON.stringify({
+        //             "user_id": process.env.WA_ID,
+        //             "number": process.env.WA_NUMBER,
+        //             "message": "Terima kasih telah mendaftar Talkshow ASIG 14!\n\n" 
+        //             + "ID Pendaftaran Anda: " + data[0].user_uuid + "\n\n"
+        //             + "Simpan ID Pendaftaran sebagai langkah untuk memverifikasi presensi Anda dalam Talkshow."
+        //         }),
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             "Authorization": process.env.WA_AUTH
+        //         }
+        //     })
+        //     res.status(201).json({
+        //         status: "success",
+        //         uuid: data[0].user_uuid
+        //     });
+        // })
     })
     .catch(error => next(error));
 }
