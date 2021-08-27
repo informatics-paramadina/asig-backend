@@ -5,21 +5,21 @@ const jwt = require("jsonwebtoken");
 
 const registerUsers = async (req, res, next) => {
     let checkEmail = await db.from('users').where({email: req.body.email}).select('email');
-    let checkPhone = await db.from('users').where({phone_number: req.body.phone_number}).select('phone_number');
+    let checkPhone = await db.from('users').where({phone_number: req.body.phone_number.replace(/^[+]/, '').replace(/^0/, '62')}).select('phone_number');
     if (checkEmail.length > 0 || checkPhone.length > 0) return res.status(400).json({status: "email or phone number already exists"})
 
     bcrypt.hash(req.body.password, 10)
         .then(hash => {
             return db('users').insert({
                 email: req.body.email,
-                phone_number: req.body.phone_number,
+                phone_number: req.body.phone_number.replace(/^[+]/, '').replace(/^0/, '62'),
                 name: req.body.name,
                 password: hash,
                 role: 'user'
             })
         })
         .then(() => {
-            res.status(201).json({ status: "succes" });
+            res.status(201).json({ status: "success" });
         })
         .catch(error => next(error));
 };
@@ -28,21 +28,21 @@ const registerAdmin = async (req, res, next) => {
     if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
 
     let checkEmail = await db.from('users').where({email: req.body.email}).select('email');
-    let checkPhone = await db.from('users').where({phone_number: req.body.phone_number}).select('phone_number');
+    let checkPhone = await db.from('users').where({phone_number: req.body.phone_number.replace(/^[+]/, '').replace(/^0/, '62')}).select('phone_number');
     if (checkEmail.length > 0 || checkPhone.length > 0) return res.status(400).json({status: "email or phone number already exists"});
 
     bcrypt.hash(req.body.password, 10)
         .then(hash => {
             return db('users').insert({
                 email: req.body.email,
-                phone_number: req.body.phone_number,
+                phone_number: req.body.phone_number.replace(/^[+]/, '').replace(/^0/, '62'),
                 name: req.body.name,
                 password: hash,
                 role: 'admin'
             })
         })
         .then(() => {
-            res.status(201).json({ status: "succes" });
+            res.status(201).json({ status: "success" });
         })
         .catch(error => next(error));
 };
@@ -75,11 +75,20 @@ const postLogin = (req, res, next) => {
                     .then(auth => {
                         if (!auth) throw Error('bad');
 
+                        // OTP (unfinished)
+
+                        // db('otp').insert({
+                        //     token: token,
+                        //     expired_at: new Date(jwt.decode(token).exp * 1000),
+                        //     user_id: user.id
+                        // }).then();
+
                         const token = jwt.sign({ 
                             userId: user.id,
                             userEmail: user.email,
                             userRole: user.role,
-                            userName: user.name
+                            userName: user.name,
+                            userPhoneNumber: user.phone_number
                         }, 
                         'shhhhh',
                         { expiresIn: "3d" });

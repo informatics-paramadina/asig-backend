@@ -6,7 +6,7 @@ exports.up = function(knex) {
         return knex.schema
             .createTable('auth', function(table) {
                 table.increments('id').primary();
-                table.string('token', 255).notNullable();
+                table.text('token', 'longtext').notNullable();
                 table.timestamp('expired_at');
                 //ref
                 table.integer('user_id').unsigned().notNullable();
