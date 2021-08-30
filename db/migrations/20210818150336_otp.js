@@ -6,7 +6,8 @@ exports.up = function(knex) {
         return knex.schema
             .createTable('otp', function(table) {
                 table.increments('id').primary();
-                table.string('token', 255).notNullable(); // atau defaultTo(0)
+                table.string('token', 255).notNullable();
+                table.boolean('is_used').defaultTo(false); // atau defaultTo(0)
                 table.timestamp('expired_at');
                 //ref
                 table.integer('user_id').unsigned().notNullable();
