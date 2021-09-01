@@ -6,6 +6,8 @@ const moment = require("moment");
 const request = require('request');
 
 const registerUsers = async (req, res, next) => {
+    if (!req.body.email || !req.body.phone_number || !req.body.name || !req.body.password) return res.status(406).json({status: "registration not accepted!"})
+    
     let checkEmail = await db.from('users').where({email: req.body.email}).select('email');
     let checkPhone = await db.from('users').where({phone_number: req.body.phone_number.replace(/^[+]/, '').replace(/^0/, '62')}).select('phone_number');
     if (checkEmail.length > 0 || checkPhone.length > 0) return res.status(400).json({status: "email or phone number already exists"})

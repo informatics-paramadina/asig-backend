@@ -33,6 +33,7 @@ const registerGame = async (req, res, next) => {
         const dataLength = req.body.name.length;
         
         for (let i=0; i<dataLength; i++) {
+            if (!req.body.name[i] || !req.body.phone_number[i] || !req.body.name_ingame[i]) return res.status(406).json({status: "registration not accepted!"})
             members.push({
                 name: req.body.name[i],
                 phone_number: req.body.phone_number[i],
@@ -71,6 +72,8 @@ const registerMinigame = async (req, res, next) => {
                 .select();
     if (checkUser.length > 0) return res.status(400).json({status: "user has already registered to participate in minigame event"})
 
+    if (!req.body.name_ingame) return res.status(406).json({status: "registration not accepted!"})
+
     db('minigame')
         .insert({
             name_ingame: req.body.name_ingame,
@@ -91,6 +94,8 @@ const registerTalkshow = async (req, res, next) => {
                 .whereRaw('users.id = ?', [req.user.userId])
                 .select();
     if (checkUser.length > 0) return res.status(400).json({status: "user has already registered to attend the talkshow"})
+
+    if (!req.body.instansi || !req.body.pekerjaan) return res.status(406).json({status: "registration not accepted!"})
 
     db.transaction(trx => {
         db
