@@ -3,7 +3,6 @@ const db = require("../config/database");
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
-const request = require('request');
 
 const registerUsers = async (req, res, next) => {
     if (!req.body.email || !req.body.phone_number || !req.body.name || !req.body.password) return res.status(406).json({status: "registration not accepted!"})
@@ -66,78 +65,40 @@ const updateUsers = (req, res, next) => {
     }
 }
 
-// const generateOTP = (req, res) => {
-//     db('otp').insert({
-//         token: Math.floor(100000 + Math.random() * 900000),
-//         expired_at: moment().add(1, 'm').toDate(),
-//         user_id: req.id
-//     }).then(id => {
-//         db('otp').where({id: id[0]}).then(data => {
-//             request.post({
-//                 url: 'https://wa.bot.ghifar.dev/sendText',
-//                 body: JSON.stringify({
-//                     "user_id": process.env.WA_ID,
-//                     "number": req.phone_number,
-//                     "message": "Kode OTP ASIG 14 Anda: " + data[0].token + "\n\n" 
-//                 }),
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                     "Authorization": process.env.WA_AUTH
-//                 }
-//             })
-//         })
-//         const verdict = verifyOTP(id);
-//     });
-//     return verdict;
+// const postLoginContinue = async (req, res) => {
+//     const user = 
+//             await db('otp')
+//                 .where({'otp.id': req.body.otp_id })
+//                 .join('users', 'users.id', 'otp.user_id')
+//                 .first();
+//     if (!user) return res.status(400).json({status: "Wrong OTP Code!"})
+//     if (Date.now() > user.expired_at) return res.status(400).json({status: "OTP Code has expired!"})
+
+//     const token = jwt.sign({ 
+//         userId: user.id,
+//         userEmail: user.email,
+//         userRole: user.role,
+//         userName: user.name,
+//         userPhoneNumber: user.phone_number
+//     }, 
+//     'shhhhh',
+//     { expiresIn: "3d" });
+
+//     db('auth').insert({
+//         token: token,
+//         expired_at: new Date(jwt.decode(token).exp * 1000),
+//         user_id: user.id
+//     }).then();
+
+//     res.status(200).json({
+//         message: "success",
+//         email: user.email,
+//         token,
+//         expiredAt: new Date(jwt.decode(token).exp * 1000)
+//     })
 // }
-
-// const verifyOTP = async (req, res) => {
-//     const userOTP = await db('otp').where({ id: req[0]}).select();
-//     console.log(userOTP);
-// }
-
-const postLoginContinue = async (req, res) => {
-    // const user = req.user;
-    // const user = 
-    //     await db('otp')
-    //         .join('users', 'users.id', 'otp.user_id')
-    //         .whereRaw('otp.token = ?', [req.body.token])
-    //         .first();
-    const user = 
-            await db('otp')
-                .where({'otp.id': req.body.otp_id })
-                .join('users', 'users.id', 'otp.user_id')
-                .first();
-    if (!user) return res.status(400).json({status: "Wrong OTP Code!"})
-    if (Date.now() > user.expired_at) return res.status(400).json({status: "OTP Code has expired!"})
-
-    const token = jwt.sign({ 
-        userId: user.id,
-        userEmail: user.email,
-        userRole: user.role,
-        userName: user.name,
-        userPhoneNumber: user.phone_number
-    }, 
-    'shhhhh',
-    { expiresIn: "3d" });
-
-    db('auth').insert({
-        token: token,
-        expired_at: new Date(jwt.decode(token).exp * 1000),
-        user_id: user.id
-    }).then();
-
-    res.status(200).json({
-        message: "success",
-        email: user.email,
-        token,
-        expiredAt: new Date(jwt.decode(token).exp * 1000)
-    })
-}
 
 const postLogin = (req, res, next) => {
-    // res.send(moment().add(1, 'm').toDate());
     db
         .from('users')
         .where({email: req.body.email})
@@ -146,38 +107,34 @@ const postLogin = (req, res, next) => {
             if (!user) throw Error('bad');
 
             return bcrypt
-                .compare(req.body.password, user.password)
-                .then(auth => {
-                    if (!auth) throw Error('bad');
+                    .compare(req.body.password, user.password)
+                    .then(auth => {
+                        if (!auth) throw Error('bad');
 
-                    // OTP (unfinished)
+                        const token = jwt.sign({
+                            userId: user.id,
+                            userEmail: user.email,
+                            userRole: user.role,
+                            userName: user.name,
+                            userPhoneNumber: user.phone_number
+                        },
+                        'shhhhh',
+                        { expiresIn: "3d" });
 
-                    db('otp').insert({
-                        token: Math.floor(100000 + Math.random() * 900000),
-                        expired_at: moment().add(1, 'm').toDate(),
-                        user_id: user.id
-                    })
-                    .then(id => {
-                        db('otp').where({id: id[0]}).then(data => {
-                            request.post({
-                                url: 'https://wa.bot.ghifar.dev/sendText',
-                                body: JSON.stringify({
-                                    "user_id": process.env.WA_ID,
-                                    "number": user.phone_number,
-                                    "message": "Kode OTP untuk login akun ASIG 14 Anda: " + data[0].token + ". Gunakan secepatnya karena OTP akan kadaluarsa dalam waktu 1 menit!" 
-                                }),
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    "Authorization": process.env.WA_AUTH
-                                }
-                            })
+                        db('auth').insert({
+                            token: token,
+                            expired_at: new Date(jwt.decode(token).exp * 1000),
+                            user_id: user.id
+                        }).then();
+
+                        res.status(200).json({
+                            message: "success",
+                            email: user.email,
+                            token,
+                            expiredAt: new Date(jwt.decode(token).exp * 1000)
                         })
-                        res.json({otp_id: id[0]});
                     })
                     .catch(error => next(error));
-                })
-                .catch(error => next(error));
         })
         .catch(error => next(error));
 };
@@ -219,7 +176,6 @@ module.exports = {
     registerUsers,
     registerAdmin,
     updateUsers,
-    postLoginContinue,
     postLogin,
     updatePresence
 };

@@ -1,5 +1,6 @@
 const db = require("../config/database");
 const moment = require('moment');
+const axios = require('axios');
 
 const getTeams = (req, res, next) => {
     db('team')
@@ -102,11 +103,62 @@ const editSchedule = (req, res, next) => {
         .catch(error => next(error));
 }
 
+const blastWA = async (req, res, next) => {
+    if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
+    let count = 0;
+    const participants = await db('users')
+        .join('talkshow', 'users.id', 'talkshow.user_id')
+        .select('users.id', 'email', 'phone_number', 'name');
+
+    for (let i=0; i<participants.length; i++) {
+        axios({
+            url: 'https://wa.bot.ghifar.dev/sendText',
+            data: JSON.stringify({
+                "user_id": process.env.WA_ID,
+                "number": participants[i].phone_number,
+                "message": req.body.message
+            }),
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json',
+                "Authorization": process.env.WA_AUTH
+            }
+        }).then((response) => {
+            console.log(response);;
+        }).catch((response) => {
+            console.log(response);
+        })
+    }
+
+    // participants.forEach(dat => {
+    //     request.post({
+    //         url: 'https://wa.bot.ghifar.dev/sendText',
+    //         body: JSON.stringify({
+    //             "user_id": process.env.WA_ID,
+    //             "number": dat.phone_number,
+    //             "message": req.body.message
+    //         }),
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //             "Authorization": process.env.WA_AUTH
+    //         }
+    //     }, (err, response, body) => {
+    //         if (body === '{"status":"id not found"}') count++;
+    //     })
+    // })
+    res.status(200).json({ 
+        status: "success"
+    });
+}
+
+
 module.exports = {
     addSchedule,
     getSchedule,
     removeSchedule,
     editSchedule,
     getPlayers,
-    getTeams
+    getTeams,
+    blastWA
 }

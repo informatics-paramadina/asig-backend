@@ -1,5 +1,5 @@
 const db = require("../config/database");
-const request = require('request');
+const axios = require('axios');
 
 const uploadLogo = (req, res, next) => {
     try {
@@ -122,25 +122,31 @@ const registerTalkshow = async (req, res, next) => {
             .whereRaw('presence.id = ?', [id[0]])
             .select('users.phone_number', 'presence.user_uuid')
             .then(data => {
-                request.post({
+                axios({
                     url: 'https://wa.bot.ghifar.dev/sendText',
-                    body: JSON.stringify({
+                    data: JSON.stringify({
                         "user_id": process.env.WA_ID,
                         "number": data[0].phone_number,
                         "message": "Terima kasih telah mendaftar Talkshow ASIG 14!\n\n" 
                         + "ID Pendaftaran Anda: " + data[0].user_uuid + "\n\n"
                         + "Simpan ID Pendaftaran sebagai langkah untuk memverifikasi presensi Anda dalam Talkshow."
                     }),
-                    method: 'POST',
+                    method: 'post',
                     headers: {
                         'Content-Type': 'application/json',
                         "Authorization": process.env.WA_AUTH
                     }
+                }).then((response) => {
+                    res.status(201).json({
+                        status: response.data.status,
+                        uuid: data[0].user_uuid
+                    });
+                }).catch(() => {
+                    res.status(400).json({
+                        status: "send otp via wa gagal!",
+                        uuid: data[0].user_uuid
+                    });
                 })
-                res.status(201).json({
-                    status: "success",
-                    uuid: data[0].user_uuid
-                });
             })
 
 

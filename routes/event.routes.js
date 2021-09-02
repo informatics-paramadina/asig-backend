@@ -11,8 +11,9 @@ const {
     editSchedule, 
     getTeams,
     getPlayers,
-    getSchedule
-} = require('../controllers/schedule.controllers');
+    getSchedule,
+    blastWA
+} = require('../controllers/admin.controllers');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth.middleware');
 const upload = require('../middleware/upload.middleware');
 const router = express.Router();
@@ -29,5 +30,7 @@ router.put('/schedule/edit', authMiddleware, adminMiddleware, editSchedule);
 router.get('/data/team', authMiddleware, adminMiddleware, getTeams);
 router.get('/data/schedule/:event', authMiddleware, adminMiddleware, getSchedule);
 router.get('/data/player/:event', authMiddleware, adminMiddleware, getPlayers);
+
+router.post('/blast/wa', authMiddleware, adminMiddleware, blastWA);
 
 module.exports = router;
