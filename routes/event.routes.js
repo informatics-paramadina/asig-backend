@@ -12,7 +12,9 @@ const {
     getTeams,
     getPlayers,
     getSchedule,
-    blastWA
+    blastWA,
+    blastEmail,
+    getPlayersByTeam
 } = require('../controllers/admin.controllers');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth.middleware');
 const upload = require('../middleware/upload.middleware');
@@ -28,9 +30,11 @@ router.delete('/schedule/remove', authMiddleware, adminMiddleware, removeSchedul
 router.put('/schedule/edit', authMiddleware, adminMiddleware, editSchedule);
 
 router.get('/data/team', authMiddleware, adminMiddleware, getTeams);
+router.get('/data/team/:id', authMiddleware, adminMiddleware, getPlayersByTeam);
 router.get('/data/schedule/:event', authMiddleware, adminMiddleware, getSchedule);
 router.get('/data/player/:event', authMiddleware, adminMiddleware, getPlayers);
 
 router.post('/blast/wa', authMiddleware, adminMiddleware, blastWA);
+router.post('/blast/email', authMiddleware, adminMiddleware, blastEmail);
 
 module.exports = router;

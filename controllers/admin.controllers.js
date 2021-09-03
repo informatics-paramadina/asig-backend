@@ -1,11 +1,20 @@
 const db = require("../config/database");
 const moment = require('moment');
 const axios = require('axios');
+const nodemailer = require('nodemailer');
 
 const getTeams = (req, res, next) => {
     db('team')
         .join('users', 'users.id', 'team.leader_id')
         .select('team.id', 'team_name', 'team_logo', 'name AS leader_name', 'team.created_at', 'team.updated_at')
+        .then(row => res.send(row))
+        .catch(err => next(err));
+}
+
+const getPlayersByTeam = (req, res, next) => {
+    db('member')
+        .where({team_id: req.params.id})
+        .select()
         .then(row => res.send(row))
         .catch(err => next(err));
 }
@@ -92,6 +101,8 @@ const editSchedule = (req, res, next) => {
             ...req.body.start_at ? {start_at: req.body.start_at} : {},
             ...req.body.team_id_1 ? {team_id_1: req.body.team_id_1} : {},
             ...req.body.team_id_2 ? {team_id_1: req.body.team_id_2} : {},
+            ...req.body.player_id_1 ? {player_id_1: req.body.player_id_1} : {},
+            ...req.body.player_id_2 ? {player_id_2: req.body.player_id_2} : {},
             updated_at: new Date() 
         })
         .then(total => {
@@ -152,6 +163,30 @@ const blastWA = async (req, res, next) => {
     });
 }
 
+const blastEmail = (req, res, next) => {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+    
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: '',
+        subject: 'Test: sending Email using Nodejs',
+        text: 'Test'
+    };
+    
+    transporter.sendMail(mailOptions, (err, info) => {
+        if (err) throw err;
+        console.log('Email sent: ' + info.response);
+    });
+
+    res.send('success mungkin');
+}
+
 
 module.exports = {
     addSchedule,
@@ -159,6 +194,8 @@ module.exports = {
     removeSchedule,
     editSchedule,
     getPlayers,
+    getPlayersByTeam,
     getTeams,
-    blastWA
+    blastWA,
+    blastEmail
 }
