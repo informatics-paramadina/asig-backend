@@ -115,59 +115,55 @@ const editSchedule = (req, res, next) => {
 }
 
 const blastWA = async (req, res, next) => {
-    if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
-    let failed = [];
-    let success = [];
-    let promises = [];
-    const participants = await db('users')
-        .join('talkshow', 'users.id', 'talkshow.user_id')
-        .select('users.id', 'email', 'phone_number', 'name');
+    if (req.params.event === 'talkshow') {
+        if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
+        let failed = [];
+        let success = [];
+        let promises = [];
+        const participants = await db('users')
+            .join('talkshow', 'users.id', 'talkshow.user_id')
+            .select('users.id', 'email', 'phone_number', 'name');
 
-    for (let i=0; i<participants.length; i++) {
-        promises.push(axios({
-            url: 'https://wa.bot.ghifar.dev/sendText',
-            data: JSON.stringify({
-                "user_id": process.env.WA_ID,
-                "number": participants[i].phone_number,
-                "message": req.body.message
-            }),
-            method: 'post',
-            headers: {
-                'Content-Type': 'application/json',
-                "Authorization": process.env.WA_AUTH
-            }
-        }).then((res) => {
-            success.push(JSON.parse(res.config.data).number);
-        }).catch((res) => {
-            failed.push(JSON.parse(res.config.data).number);
-        }))
+        let time = 0;
+        for (let i=0; i<participants.length; i++) {
+            time += 3000;
+            setTimeout(() => {
+                promises.push(axios({
+                url: 'https://wa.bot.ghifar.dev/sendText',
+                data: JSON.stringify({
+                    "user_id": process.env.WA_ID,
+                    "number": participants[i].phone_number,
+                    "message": req.body.message
+                }),
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization": process.env.WA_AUTH
+                }
+                }).then((res) => {
+                    success.push(JSON.parse(res.config.data).number);
+                }).catch((res) => {
+                    failed.push(JSON.parse(res.config.data).number);
+                }));
+            }, 3000);
+        }
+        
+        setTimeout(() => {
+            Promise.all(promises).then(() => {
+                res.status(200).json({
+                    total_participants: participants.length,
+                    success: success,
+                    failed: failed
+                });
+            });
+        }, time);
+    } else if (req.params.event === 'mini') {
+
+    } else if (req.params.event === 'game') {
+
+    } else {
+        next();
     }
-
-    // participants.forEach(dat => {
-    //     request.post({
-    //         url: 'https://wa.bot.ghifar.dev/sendText',
-    //         body: JSON.stringify({
-    //             "user_id": process.env.WA_ID,
-    //             "number": dat.phone_number,
-    //             "message": req.body.message
-    //         }),
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //             "Authorization": process.env.WA_AUTH
-    //         }
-    //     }, (err, response, body) => {
-    //         if (body === '{"status":"id not found"}') count++;
-    //     })
-    // })
-    Promise.all(promises).then(() => {
-        res.status(200).json({ 
-            // status: `${success} success & ${failed} failed`
-            total_participants: participants.length,
-            success: success,
-            failed: failed
-        });
-    });
 }
 
 const blastEmail = (req, res, next) => {

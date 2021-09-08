@@ -41,6 +41,8 @@ const registerGame = async (req, res, next) => {
             })
         }
 
+        if (!req.body.team_name) return res.status(406).json({status: "registration not accepted!"})
+
         db
             .insert({
                 team_name: req.body.team_name,

@@ -34,7 +34,7 @@ router.get('/data/team/:id', authMiddleware, adminMiddleware, getPlayersByTeam);
 router.get('/data/schedule/:event', authMiddleware, adminMiddleware, getSchedule);
 router.get('/data/player/:event', authMiddleware, adminMiddleware, getPlayers);
 
-router.post('/blast/wa', authMiddleware, adminMiddleware, blastWA);
+router.post('/blast/wa/:event', authMiddleware, adminMiddleware, blastWA);
 router.post('/blast/email', authMiddleware, adminMiddleware, blastEmail);
 
 module.exports = router;
