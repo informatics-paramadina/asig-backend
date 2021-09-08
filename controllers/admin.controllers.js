@@ -123,12 +123,11 @@ const blastWA = async (req, res, next) => {
         if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
         let failed = [];
         let success = [];
-        let promises = [];
+        // let promises = [];
         const participants = await db('users')
             .join('talkshow', 'users.id', 'talkshow.user_id')
             .select('users.id', 'email', 'phone_number', 'name');
 
-        // let time = 0;
         for (let i=0; i<participants.length; i++) {
             try {
                 let res = await axios({
@@ -150,7 +149,12 @@ const blastWA = async (req, res, next) => {
             }
             await blastDelay(3000);
         }
-        res.send('test');
+
+        await res.status(200).json({
+            total_participants: participants.length,
+            success: success,
+            failed: failed
+        });
         // setTimeout(() => {
         //     Promise.all(promises).then(() => {
         //         res.status(200).json({
@@ -161,9 +165,77 @@ const blastWA = async (req, res, next) => {
         //     });
         // }, time);
     } else if (req.params.event === 'mini') {
+        if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
+        let failed = [];
+        let success = [];
+        // let promises = [];
+        const participants = await db('users')
+            .join('minigame', 'users.id', 'minigame.user_id')
+            .select('users.id', 'email', 'phone_number', 'name');
 
+        for (let i=0; i<participants.length; i++) {
+            try {
+                let res = await axios({
+                    url: 'https://wa.bot.ghifar.dev/sendText',
+                    data: JSON.stringify({
+                        "user_id": process.env.WA_ID,
+                        "number": participants[i].phone_number,
+                        "message": req.body.message
+                    }),
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": process.env.WA_AUTH
+                    }
+                })
+                success.push(JSON.parse(res.config.data).number);
+            } catch(res) {
+                failed.push(JSON.parse(res.config.data).number);
+            }
+            await blastDelay(3000);
+        }
+
+        await res.status(200).json({
+            total_participants: participants.length,
+            success: success,
+            failed: failed
+        });
     } else if (req.params.event === 'game') {
+        if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
+        let failed = [];
+        let success = [];
+        // let promises = [];
+        const participants = await db('users')
+            .join('team', 'users.id', 'team.leader_id')
+            .select('users.id', 'email', 'phone_number', 'name');
 
+        for (let i=0; i<participants.length; i++) {
+            try {
+                let res = await axios({
+                    url: 'https://wa.bot.ghifar.dev/sendText',
+                    data: JSON.stringify({
+                        "user_id": process.env.WA_ID,
+                        "number": participants[i].phone_number,
+                        "message": req.body.message
+                    }),
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": process.env.WA_AUTH
+                    }
+                })
+                success.push(JSON.parse(res.config.data).number);
+            } catch(res) {
+                failed.push(JSON.parse(res.config.data).number);
+            }
+            await blastDelay(3000);
+        }
+
+        await res.status(200).json({
+            total_participants: participants.length,
+            success: success,
+            failed: failed
+        });
     } else {
         next();
     }
