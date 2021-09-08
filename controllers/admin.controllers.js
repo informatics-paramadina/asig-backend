@@ -116,13 +116,15 @@ const editSchedule = (req, res, next) => {
 
 const blastWA = async (req, res, next) => {
     if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
-    let count = 0;
+    let failed = [];
+    let success = [];
+    let promises = [];
     const participants = await db('users')
         .join('talkshow', 'users.id', 'talkshow.user_id')
         .select('users.id', 'email', 'phone_number', 'name');
 
     for (let i=0; i<participants.length; i++) {
-        axios({
+        promises.push(axios({
             url: 'https://wa.bot.ghifar.dev/sendText',
             data: JSON.stringify({
                 "user_id": process.env.WA_ID,
@@ -134,11 +136,11 @@ const blastWA = async (req, res, next) => {
                 'Content-Type': 'application/json',
                 "Authorization": process.env.WA_AUTH
             }
-        }).then((response) => {
-            console.log(response);;
-        }).catch((response) => {
-            console.log(response);
-        })
+        }).then((res) => {
+            success.push(JSON.parse(res.config.data).number);
+        }).catch((res) => {
+            failed.push(JSON.parse(res.config.data).number);
+        }))
     }
 
     // participants.forEach(dat => {
@@ -158,8 +160,13 @@ const blastWA = async (req, res, next) => {
     //         if (body === '{"status":"id not found"}') count++;
     //     })
     // })
-    res.status(200).json({ 
-        status: "success"
+    Promise.all(promises).then(() => {
+        res.status(200).json({ 
+            // status: `${success} success & ${failed} failed`
+            total_participants: participants.length,
+            success: success,
+            failed: failed
+        });
     });
 }
 

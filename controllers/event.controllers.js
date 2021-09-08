@@ -44,7 +44,7 @@ const registerGame = async (req, res, next) => {
         db
             .insert({
                 team_name: req.body.team_name,
-                team_logo: req.file ? fullUrl : 'nope',
+                team_logo: req.file ? fullUrl : req.protocol + '://' + req.get('host') + '/images/default.png',
                 leader_id: req.user.userId,
             })
             .into('team')
