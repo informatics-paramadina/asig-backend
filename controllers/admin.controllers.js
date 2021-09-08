@@ -114,6 +114,10 @@ const editSchedule = (req, res, next) => {
         .catch(error => next(error));
 }
 
+const blastDelay = async (time) => {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
+
 const blastWA = async (req, res, next) => {
     if (req.params.event === 'talkshow') {
         if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
@@ -124,39 +128,38 @@ const blastWA = async (req, res, next) => {
             .join('talkshow', 'users.id', 'talkshow.user_id')
             .select('users.id', 'email', 'phone_number', 'name');
 
-        let time = 0;
+        // let time = 0;
         for (let i=0; i<participants.length; i++) {
-            time += 3000;
-            setTimeout(() => {
-                promises.push(axios({
-                url: 'https://wa.bot.ghifar.dev/sendText',
-                data: JSON.stringify({
-                    "user_id": process.env.WA_ID,
-                    "number": participants[i].phone_number,
-                    "message": req.body.message
-                }),
-                method: 'post',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization": process.env.WA_AUTH
-                }
-                }).then((res) => {
-                    success.push(JSON.parse(res.config.data).number);
-                }).catch((res) => {
-                    failed.push(JSON.parse(res.config.data).number);
-                }));
-            }, 3000);
+            try {
+                let res = await axios({
+                    url: 'https://wa.bot.ghifar.dev/sendText',
+                    data: JSON.stringify({
+                        "user_id": process.env.WA_ID,
+                        "number": participants[i].phone_number,
+                        "message": req.body.message
+                    }),
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": process.env.WA_AUTH
+                    }
+                })
+                success.push(JSON.parse(res.config.data).number);
+            } catch(res) {
+                failed.push(JSON.parse(res.config.data).number);
+            }
+            await blastDelay(3000);
         }
-        
-        setTimeout(() => {
-            Promise.all(promises).then(() => {
-                res.status(200).json({
-                    total_participants: participants.length,
-                    success: success,
-                    failed: failed
-                });
-            });
-        }, time);
+        res.send('test');
+        // setTimeout(() => {
+        //     Promise.all(promises).then(() => {
+        //         res.status(200).json({
+        //             total_participants: participants.length,
+        //             success: success,
+        //             failed: failed
+        //         });
+        //     });
+        // }, time);
     } else if (req.params.event === 'mini') {
 
     } else if (req.params.event === 'game') {
