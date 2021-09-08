@@ -58,30 +58,35 @@ exports.seed = function(knex) {
           nama_project: 'Curut',
           creator: 'Muhammad Al Ghifari',
           project_link: 'https://if.paramadina.ac.id/repo/game/curut/',
+          thumbnail: 'https://api.himti.my.id/images/game/curut.jpg',
           type: 'game'
         },
         {
           nama_project: 'Astronot',
           creator: 'Dwi M Nofan',
           project_link: 'https://if.paramadina.ac.id/repo/game/astronot/',
+          thumbnail: 'https://api.himti.my.id/images/game/astronot.jpg',
           type: 'game'
         },
         {
           nama_project: 'Dragon',
           creator: 'Nakia Natassa',
           project_link: 'https://if.paramadina.ac.id/repo/game/dragon/',
+          thumbnail: 'https://api.himti.my.id/images/game/dragon.jpg',
           type: 'game'
         },
         {
           nama_project: 'UFO',
           creator: 'Ahmad Muaz',
           project_link: 'https://if.paramadina.ac.id/repo/game/ufo/',
+          thumbnail: 'https://api.himti.my.id/images/game/ufo.jpg',
           type: 'game'
         },
         {
           nama_project: 'Pukul Bola',
           creator: 'Wulan Sari Gumilang',
           project_link: 'https://if.paramadina.ac.id/repo/game/pukulbola/',
+          thumbnail: 'https://api.himti.my.id/images/game/pukul.jpg',
           type: 'game'
         },
       ]);
