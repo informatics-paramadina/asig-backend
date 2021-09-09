@@ -174,6 +174,8 @@ const updatePresence = (req, res, next) => {
 }
 
 const forgetPassword = async (req, res, next) => {
+    if (!req.body.phone_number) return res.status(406).json({status: "request not accepted!"})
+
     let checkUser = await db.from('users').where({phone_number: req.body.phone_number.replace(/^[+]/, '').replace(/^0/, '62')}).select('id', 'phone_number').first();
     if (!checkUser) return res.status(400).json({status: "phone number not found!"});
     
