@@ -63,7 +63,7 @@ const addSchedule = (req, res, next) => {
     db('schedule')
         .insert({
             event_name: req.body.event_name,
-            description: req.body.description,
+            description: req.body.description ? req.body.description : '-',
             start_at: req.body.start_at ? req.body.start_at : moment().add(1, 'd').toDate(),
             created_by: req.user.userId,
             team_id_1: req.body.team_id_1,
@@ -121,8 +121,8 @@ const blastDelay = async (time) => {
 const blastWA = async (req, res, next) => {
     if (req.params.event === 'talkshow') {
         if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
-        let failed = [];
-        let success = [];
+        // let failed = [];
+        // let success = [];
         // let promises = [];
         const participants = await db('users')
             .join('talkshow', 'users.id', 'talkshow.user_id')
@@ -143,18 +143,33 @@ const blastWA = async (req, res, next) => {
                         "Authorization": process.env.WA_AUTH
                     }
                 })
-                success.push(JSON.parse(res.config.data).number);
+                db('blast').insert({
+                    message: req.body.message,
+                    message_time: new Date(),
+                    status: 'success',
+                    phone_number: participants[i].phone_number,
+                    event: 'talkshow'
+                }).then();
+                // success.push(JSON.parse(res.config.data).number);
             } catch(res) {
-                failed.push(JSON.parse(res.config.data).number);
+                db('blast').insert({
+                    message: req.body.message,
+                    message_time: new Date(),
+                    status: 'failed',
+                    phone_number: participants[i].phone_number,
+                    event: 'talkshow'
+                }).then();
+                // failed.push(JSON.parse(res.config.data).number);
             }
             await blastDelay(3000);
         }
 
-        await res.status(200).json({
-            total_participants: participants.length,
-            success: success,
-            failed: failed
-        });
+        // await res.status(200).json({
+        //     total_participants: participants.length,
+        //     success: success,
+        //     failed: failed
+        // });
+        res.send('ok');
         // setTimeout(() => {
         //     Promise.all(promises).then(() => {
         //         res.status(200).json({
@@ -166,8 +181,8 @@ const blastWA = async (req, res, next) => {
         // }, time);
     } else if (req.params.event === 'mini') {
         if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
-        let failed = [];
-        let success = [];
+        // let failed = [];
+        // let success = [];
         // let promises = [];
         const participants = await db('users')
             .join('minigame', 'users.id', 'minigame.user_id')
@@ -188,22 +203,32 @@ const blastWA = async (req, res, next) => {
                         "Authorization": process.env.WA_AUTH
                     }
                 })
-                success.push(JSON.parse(res.config.data).number);
+                db('blast').insert({
+                    message: req.body.message,
+                    message_time: new Date(),
+                    status: 'success',
+                    phone_number: participants[i].phone_number,
+                    event: 'minigame'
+                }).then();
+                // success.push(JSON.parse(res.config.data).number);
             } catch(res) {
-                failed.push(JSON.parse(res.config.data).number);
+                db('blast').insert({
+                    message: req.body.message,
+                    message_time: new Date(),
+                    status: 'failed',
+                    phone_number: participants[i].phone_number,
+                    event: 'minigame'
+                }).then();
+                // failed.push(JSON.parse(res.config.data).number);
             }
             await blastDelay(3000);
         }
-
-        await res.status(200).json({
-            total_participants: participants.length,
-            success: success,
-            failed: failed
-        });
+        
+        res.send('ok');
     } else if (req.params.event === 'game') {
         if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
-        let failed = [];
-        let success = [];
+        // let failed = [];
+        // let success = [];
         // let promises = [];
         const participants = await db('users')
             .join('team', 'users.id', 'team.leader_id')
@@ -224,18 +249,52 @@ const blastWA = async (req, res, next) => {
                         "Authorization": process.env.WA_AUTH
                     }
                 })
-                success.push(JSON.parse(res.config.data).number);
+                db('blast').insert({
+                    message: req.body.message,
+                    message_time: new Date(),
+                    status: 'success',
+                    phone_number: participants[i].phone_number,
+                    event: 'game'
+                }).then();
+                // success.push(JSON.parse(res.config.data).number);
             } catch(res) {
-                failed.push(JSON.parse(res.config.data).number);
+                db('blast').insert({
+                    message: req.body.message,
+                    message_time: new Date(),
+                    status: 'failed',
+                    phone_number: participants[i].phone_number,
+                    event: 'game'
+                }).then();
+                // failed.push(JSON.parse(res.config.data).number);
             }
             await blastDelay(3000);
         }
+        
+        res.send('ok');
+    } else {
+        next();
+    }
+}
 
-        await res.status(200).json({
-            total_participants: participants.length,
-            success: success,
-            failed: failed
-        });
+const getLogs = (req, res, next) => {
+    if (req.params.event === 'talkshow') {
+        db('blast')
+            .where({ event: 'talkshow' })
+            .select()
+            .then(row => res.send(row))
+            .catch(err => next(err));
+    } else if (req.params.event === 'game') {
+        db('blast')
+            .where({ event: 'game' })
+            .select()
+            .then(row => res.send(row))
+            .catch(err => next(err));
+    } else if (req.params.event === 'mini') {
+        db('blast')
+            .where({ event: 'minigame' })
+            .select()
+            .then(row => res.send(row))
+            .catch(err => next(err));
     } else {
         next();
     }
@@ -275,5 +334,6 @@ module.exports = {
     getPlayersByTeam,
     getTeams,
     blastWA,
-    blastEmail
+    blastEmail,
+    getLogs
 }

@@ -4,7 +4,9 @@ const {
     registerAdmin, 
     postLogin, 
     updateUsers,
-    updatePresence
+    updatePresence,
+    forgetPassword,
+    checkForgetPassword
 } = require('../controllers/users.controllers');
 const {
     authMiddleware, 
@@ -16,6 +18,8 @@ router.get('/usertest', (req, res) => res.send('yoii'))
 router.post('/user', registerUsers);
 router.post('/admin', registerAdmin);
 router.post('/login', postLogin);
+router.post('/forget', forgetPassword);
+router.put('/check', checkForgetPassword);
 // router.post('/login-otp', postLoginContinue);
 router.get('/auth-test', authMiddleware, (req, res) => {
     // res.send("success! your role is " + req.user.userRole);
