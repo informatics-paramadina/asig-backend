@@ -3,7 +3,8 @@ const {
     uploadLogo, 
     registerGame, 
     registerMinigame, 
-    registerTalkshow 
+    registerTalkshow, 
+    uploadBuktiPembayaran
 } = require('../controllers/event.controllers');
 const { 
     addSchedule, 
@@ -32,12 +33,14 @@ router.put('/schedule/edit', authMiddleware, adminMiddleware, editSchedule);
 
 router.get('/data/team', authMiddleware, adminMiddleware, getTeams);
 router.get('/data/team/:id', authMiddleware, adminMiddleware, getPlayersByTeam);
-router.get('/data/schedule/:event', authMiddleware, adminMiddleware, getSchedule);
+router.get('/data/schedule/:event', authMiddleware, getSchedule);
 router.get('/data/player/:event', authMiddleware, adminMiddleware, getPlayers);
 
 router.post('/blast/wa/:event', authMiddleware, adminMiddleware, blastWA);
 router.post('/blast/email', authMiddleware, adminMiddleware, blastEmail);
 
 router.get('/log/:event', authMiddleware, adminMiddleware, getLogs);
+
+router.post('/upload-bukti', authMiddleware, upload.single('file'), uploadBuktiPembayaran);
 
 module.exports = router;

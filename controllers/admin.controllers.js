@@ -6,7 +6,8 @@ const nodemailer = require('nodemailer');
 const getTeams = (req, res, next) => {
     db('team')
         .join('users', 'users.id', 'team.leader_id')
-        .select('team.id', 'team_name', 'team_logo', 'name AS leader_name', 'team.created_at', 'team.updated_at')
+        .leftJoin('bukti', 'bukti.team_id', 'team.id')
+        .select('team.id', 'team_name', 'team_logo', 'name AS leader_name', 'bukti.file_bukti', 'bukti.nama_rekening', 'team.created_at', 'team.updated_at')
         .then(row => res.send(row))
         .catch(err => next(err));
 }

@@ -12,6 +12,32 @@ const uploadLogo = (req, res, next) => {
     }
 };
 
+const uploadBuktiPembayaran = async (req, res, next) => {
+    let getUser = await db("users")
+        .join('team', 'team.leader_id', 'users.id')
+        .whereRaw('users.id = ?', [req.user.userId])
+        .select('team.id AS team_id')
+        .first();
+
+    if (!req.file) return res.status(406).json({status: "no file uploaded!"}) 
+
+    const halfUrl = req.protocol + '://' + req.get('host') + '/';
+    const fullUrl = halfUrl + req.file.path.replace(/\\/g, "/");
+
+    db("bukti")
+        .insert({
+            team_id: getUser.team_id,
+            file_bukti: fullUrl,
+            nama_rekening: req.body.nama_rekening
+        })
+        .then(() => {
+            res.status(201).json({
+                status: "success"
+            });
+        })
+        .catch(error => next(error));
+};
+
 const registerGame = async (req, res, next) => {
     let checkUser = 
         await db("users")
@@ -181,5 +207,6 @@ module.exports = {
     uploadLogo,
     registerGame,
     registerTalkshow,
-    registerMinigame
+    registerMinigame,
+    uploadBuktiPembayaran
 } 
