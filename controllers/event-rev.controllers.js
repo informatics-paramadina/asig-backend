@@ -7,7 +7,7 @@ const registerGame = async (req, res, next) => {
     let checkEmail = await db.from('game-rev').where({leader_email: req.body.leader_email}).select('leader_email');
     let checkPhone = await db.from('game-rev').where({leader_phone_number: req.body.leader_phone_number.replace(/^[+]/, '').replace(/^0/, '62')}).select('leader_phone_number');
 
-    // if (checkEmail.length > 0 || checkPhone.length > 0) return res.status(400).json({status: "user has already registered to participate in game event"})
+    if (checkEmail.length > 0 || checkPhone.length > 0) return res.status(400).json({status: "user has already registered to participate in game event"})
 
     db.transaction(trx => {
         let fullUrl;
@@ -19,14 +19,18 @@ const registerGame = async (req, res, next) => {
             
         const members = [];
         // console.log(req.body.name.length)
-        const dataLength = req.body.name.length;
+        const nameConverted = req.body.name.split(',');
+        const phoneConverted = req.body.phone_number.split(',');
+        const nameGameConverted = req.body.name_ingame.split(',');
+
+        const dataLength = nameConverted.length;
         
         for (let i=0; i<dataLength; i++) {
-            if (!req.body.name[i] || !req.body.phone_number[i] || !req.body.name_ingame[i]) return res.status(406).json({status: "registration not accepted!"})
+            if (!nameConverted[i] || !phoneConverted[i] || !nameGameConverted[i]) return res.status(406).json({status: "registration not accepted!"})
             members.push({
-                name: req.body.name[i],
-                phone_number: req.body.phone_number[i],
-                name_ingame: req.body.name_ingame[i]
+                name: nameConverted[i],
+                phone_number: phoneConverted[i],
+                name_ingame: nameGameConverted[i]
             })
         }
 
@@ -64,7 +68,7 @@ const registerMinigame = async (req, res, next) => {
     let checkEmail = await db.from('minigame-rev').where({email: req.body.email}).select('email');
     let checkPhone = await db.from('minigame-rev').where({phone_number: req.body.phone_number.replace(/^[+]/, '').replace(/^0/, '62')}).select('phone_number');
 
-    // if (checkEmail.length > 0 || checkPhone.length > 0) return res.status(400).json({status: "user has already registered to participate in minigame event"})
+    if (checkEmail.length > 0 || checkPhone.length > 0) return res.status(400).json({status: "user has already registered to participate in minigame event"})
 
     db('minigame-rev')
         .insert({
@@ -87,7 +91,7 @@ const registerTalkshow = async (req, res, next) => {
     let checkEmail = await db.from('talkshow-rev').where({email: req.body.email}).select('email');
     let checkPhone = await db.from('talkshow-rev').where({phone_number: req.body.phone_number.replace(/^[+]/, '').replace(/^0/, '62')}).select('phone_number');
 
-    // if (checkEmail.length > 0 || checkPhone.length > 0) return res.status(400).json({status: "user has already registered to attend the talkshow"})
+    if (checkEmail.length > 0 || checkPhone.length > 0) return res.status(400).json({status: "user has already registered to attend the talkshow"})
 
     db('talkshow-rev')
         .insert({
