@@ -31,15 +31,15 @@ router.post('/schedule/add', authMiddleware, adminMiddleware, addSchedule);
 router.delete('/schedule/remove', authMiddleware, adminMiddleware, removeSchedule);
 router.put('/schedule/edit', authMiddleware, adminMiddleware, editSchedule);
 
-router.get('/data/team', authMiddleware, adminMiddleware, getTeamsRev);
-router.get('/data/team/:id', authMiddleware, adminMiddleware, getPlayersRev);
+router.get('/data/team', getTeamsRev);
+router.get('/data/team/:id', getPlayersRev);
 router.get('/data/schedule/:event', authMiddleware, getSchedule);
-router.get('/data/player/:event', authMiddleware, adminMiddleware, getPlayersByTeamRev);
+router.get('/data/player/:event', getPlayersByTeamRev);
 
-router.post('/blast/wa/:event', authMiddleware, adminMiddleware, blastWARev);
+router.post('/blast/wa/:event', blastWARev);
 router.post('/blast/email', authMiddleware, adminMiddleware, blastEmail);
 
-router.get('/log/:event', authMiddleware, adminMiddleware, getLogs);
+router.get('/log/:event', getLogs);
 
 router.post('/upload-bukti', authMiddleware, upload.single('file'), uploadBuktiPembayaran);
 
