@@ -10,12 +10,12 @@ const {
     addSchedule, 
     removeSchedule, 
     editSchedule, 
-    getTeams,
-    getPlayers,
+    getTeamsRev,
+    getPlayersRev,
     getSchedule,
-    blastWA,
+    blastWARev,
     blastEmail,
-    getPlayersByTeam,
+    getPlayersByTeamRev,
     getLogs
 } = require('../controllers/admin.controllers');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth.middleware');
@@ -31,12 +31,12 @@ router.post('/schedule/add', authMiddleware, adminMiddleware, addSchedule);
 router.delete('/schedule/remove', authMiddleware, adminMiddleware, removeSchedule);
 router.put('/schedule/edit', authMiddleware, adminMiddleware, editSchedule);
 
-router.get('/data/team', authMiddleware, adminMiddleware, getTeams);
-router.get('/data/team/:id', authMiddleware, adminMiddleware, getPlayersByTeam);
+router.get('/data/team', authMiddleware, adminMiddleware, getTeamsRev);
+router.get('/data/team/:id', authMiddleware, adminMiddleware, getPlayersRev);
 router.get('/data/schedule/:event', authMiddleware, getSchedule);
-router.get('/data/player/:event', authMiddleware, adminMiddleware, getPlayers);
+router.get('/data/player/:event', authMiddleware, adminMiddleware, getPlayersByTeamRev);
 
-router.post('/blast/wa/:event', authMiddleware, adminMiddleware, blastWA);
+router.post('/blast/wa/:event', authMiddleware, adminMiddleware, blastWARev);
 router.post('/blast/email', authMiddleware, adminMiddleware, blastEmail);
 
 router.get('/log/:event', authMiddleware, adminMiddleware, getLogs);

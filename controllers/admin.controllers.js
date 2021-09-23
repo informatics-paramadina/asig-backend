@@ -3,6 +3,214 @@ const moment = require('moment');
 const axios = require('axios');
 const nodemailer = require('nodemailer');
 
+const getTeamsRev = (req, res, next) => {
+    if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
+
+    db('game-rev')
+        .select()
+        .then(row => res.send(row))
+        .catch(err => next(err));
+}
+
+const getPlayersByTeamRev = (req, res, next) => {
+    if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
+
+    db('player-rev')
+        .where({team_id: req.params.id})
+        .select()
+        .then(row => res.send(row))
+        .catch(err => next(err));
+}
+
+const getPlayersRev = (req, res, next) => {
+    if (req.params.event === 'mini') {
+        db('minigame-rev')
+            .select()
+            .then(row => res.send(row))
+            .catch(err => next(err));
+    } else if (req.params.event === 'game') {
+        db('player-rev')
+            .select()
+            .then(row => res.send(row))
+            .catch(err => next(err));
+    } else if (req.params.event === 'talkshow') {
+        db('talkshow-rev')
+            .select()
+            .then(row => res.send(row))
+            .catch(err => next(err));
+    } else {
+        next();
+    }
+}
+
+const blastDelay = async (time) => {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
+
+const blastWARev = async (req, res, next) => {
+    if (req.params.event === 'talkshow') {
+        if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
+        // let failed = [];
+        // let success = [];
+        // let promises = [];
+        const participants = await db('talkshow-rev').select('email', 'phone_number', 'name');
+
+        for (let i=0; i<participants.length; i++) {
+            try {
+                let res = await axios({
+                    url: 'https://wa.bot.ghifar.dev/sendText',
+                    data: JSON.stringify({
+                        "user_id": process.env.WA_ID,
+                        "number": participants[i].phone_number,
+                        "message": req.body.message
+                    }),
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": process.env.WA_AUTH
+                    }
+                })
+                db('blast').insert({
+                    message: req.body.message,
+                    message_time: new Date(),
+                    status: 'success',
+                    phone_number: participants[i].phone_number,
+                    event: 'talkshow'
+                }).then();
+                // success.push(JSON.parse(res.config.data).number);
+            } catch(res) {
+                db('blast').insert({
+                    message: req.body.message,
+                    message_time: new Date(),
+                    status: 'failed',
+                    phone_number: participants[i].phone_number,
+                    event: 'talkshow'
+                }).then();
+                // failed.push(JSON.parse(res.config.data).number);
+            }
+            await blastDelay(3000);
+        }
+
+        res.send('ok');
+    } else if (req.params.event === 'mini') {
+        if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
+        // let failed = [];
+        // let success = [];
+        // let promises = [];
+        const participants = await db('minigame-rev').select('email', 'phone_number', 'name');
+
+        for (let i=0; i<participants.length; i++) {
+            try {
+                let res = await axios({
+                    url: 'https://wa.bot.ghifar.dev/sendText',
+                    data: JSON.stringify({
+                        "user_id": process.env.WA_ID,
+                        "number": participants[i].phone_number,
+                        "message": req.body.message
+                    }),
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": process.env.WA_AUTH
+                    }
+                })
+                db('blast').insert({
+                    message: req.body.message,
+                    message_time: new Date(),
+                    status: 'success',
+                    phone_number: participants[i].phone_number,
+                    event: 'minigame'
+                }).then();
+                // success.push(JSON.parse(res.config.data).number);
+            } catch(res) {
+                db('blast').insert({
+                    message: req.body.message,
+                    message_time: new Date(),
+                    status: 'failed',
+                    phone_number: participants[i].phone_number,
+                    event: 'minigame'
+                }).then();
+                // failed.push(JSON.parse(res.config.data).number);
+            }
+            await blastDelay(3000);
+        }
+        
+        res.send('ok');
+    } else if (req.params.event === 'game') {
+        if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
+        // let failed = [];
+        // let success = [];
+        // let promises = [];
+        const participants = await db('game-rev').select('leader_email', 'leader_phone_number', 'leader_name');
+
+        for (let i=0; i<participants.length; i++) {
+            try {
+                let res = await axios({
+                    url: 'https://wa.bot.ghifar.dev/sendText',
+                    data: JSON.stringify({
+                        "user_id": process.env.WA_ID,
+                        "number": participants[i].leader_phone_number,
+                        "message": req.body.message
+                    }),
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": process.env.WA_AUTH
+                    }
+                })
+                db('blast').insert({
+                    message: req.body.message,
+                    message_time: new Date(),
+                    status: 'success',
+                    phone_number: participants[i].leader_phone_number,
+                    event: 'game'
+                }).then();
+                // success.push(JSON.parse(res.config.data).number);
+            } catch(res) {
+                db('blast').insert({
+                    message: req.body.message,
+                    message_time: new Date(),
+                    status: 'failed',
+                    phone_number: participants[i].leader_phone_number,
+                    event: 'game'
+                }).then();
+                // failed.push(JSON.parse(res.config.data).number);
+            }
+            await blastDelay(3000);
+        }
+        
+        res.send('ok');
+    } else {
+        next();
+    }
+}
+
+const getLogs = (req, res, next) => {
+    if (req.params.event === 'talkshow') {
+        db('blast')
+            .where({ event: 'talkshow' })
+            .select()
+            .then(row => res.send(row))
+            .catch(err => next(err));
+    } else if (req.params.event === 'game') {
+        db('blast')
+            .where({ event: 'game' })
+            .select()
+            .then(row => res.send(row))
+            .catch(err => next(err));
+    } else if (req.params.event === 'mini') {
+        db('blast')
+            .where({ event: 'minigame' })
+            .select()
+            .then(row => res.send(row))
+            .catch(err => next(err));
+    } else {
+        next();
+    }
+}
+
+// --------------------------------------------------------------------------------
+
 const getTeams = (req, res, next) => {
     db('team')
         .join('users', 'users.id', 'team.leader_id')
@@ -113,10 +321,6 @@ const editSchedule = (req, res, next) => {
             })
         })
         .catch(error => next(error));
-}
-
-const blastDelay = async (time) => {
-    return new Promise(resolve => setTimeout(resolve, time));
 }
 
 const blastWA = async (req, res, next) => {
@@ -277,30 +481,6 @@ const blastWA = async (req, res, next) => {
     }
 }
 
-const getLogs = (req, res, next) => {
-    if (req.params.event === 'talkshow') {
-        db('blast')
-            .where({ event: 'talkshow' })
-            .select()
-            .then(row => res.send(row))
-            .catch(err => next(err));
-    } else if (req.params.event === 'game') {
-        db('blast')
-            .where({ event: 'game' })
-            .select()
-            .then(row => res.send(row))
-            .catch(err => next(err));
-    } else if (req.params.event === 'mini') {
-        db('blast')
-            .where({ event: 'minigame' })
-            .select()
-            .then(row => res.send(row))
-            .catch(err => next(err));
-    } else {
-        next();
-    }
-}
-
 const blastEmail = (req, res, next) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -331,10 +511,10 @@ module.exports = {
     getSchedule,
     removeSchedule,
     editSchedule,
-    getPlayers,
-    getPlayersByTeam,
-    getTeams,
-    blastWA,
+    getPlayersRev,
+    getPlayersByTeamRev,
+    getTeamsRev,
+    blastWARev,
     blastEmail,
     getLogs
 }
