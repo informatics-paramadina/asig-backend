@@ -32,9 +32,9 @@ router.delete('/schedule/remove', authMiddleware, adminMiddleware, removeSchedul
 router.put('/schedule/edit', authMiddleware, adminMiddleware, editSchedule);
 
 router.get('/data/team', getTeamsRev);
-router.get('/data/team/:id', getPlayersRev);
+router.get('/data/team/:id', getPlayersByTeamRev);
 router.get('/data/schedule/:event', authMiddleware, getSchedule);
-router.get('/data/player/:event', getPlayersByTeamRev);
+router.get('/data/player/:event', getPlayersRev);
 
 router.post('/blast/wa/:event', blastWARev);
 router.post('/blast/email', authMiddleware, adminMiddleware, blastEmail);
