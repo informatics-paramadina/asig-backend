@@ -23,6 +23,8 @@ const getPlayersByTeamRev = (req, res, next) => {
 }
 
 const getPlayersRev = (req, res, next) => {
+    if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
+
     if (req.params.event === 'mini') {
         db('minigame-rev')
             .select()
@@ -48,6 +50,8 @@ const blastDelay = async (time) => {
 }
 
 const blastWARev = async (req, res, next) => {
+    if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
+
     if (req.params.event === 'talkshow') {
         if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
         // let failed = [];
@@ -186,6 +190,8 @@ const blastWARev = async (req, res, next) => {
 }
 
 const getLogs = (req, res, next) => {
+    if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
+    
     if (req.params.event === 'talkshow') {
         db('blast')
             .where({ event: 'talkshow' })
