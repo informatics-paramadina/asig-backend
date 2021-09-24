@@ -22,7 +22,7 @@ const getPlayersByTeamRev = (req, res, next) => {
         .catch(err => next(err));
 }
 
-const getPlayersRev = (req, res, next) => {
+const getPlayersRev = async (req, res, next) => {
     if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
 
     if (req.params.event === 'mini') {
@@ -31,10 +31,56 @@ const getPlayersRev = (req, res, next) => {
             .then(row => res.send(row))
             .catch(err => next(err));
     } else if (req.params.event === 'game') {
-        db('player-rev')
-            .select()
-            .then(row => res.send(row))
-            .catch(err => next(err));
+        try {
+            const data = await db('game-rev')
+            .join('player-rev', 'player-rev.team_id', 'game-rev.id')
+            .select();
+
+            const resultData = [];
+            let teamId = [];
+
+            for (let i=0; i<data.length; i++) {
+                if (teamId.includes(data[i].team_id)) {
+                    resultData.some(el => {
+                        if (el.team_id === data[i].team_id) {
+                            let stuff = {
+                                name: data[i].name,
+                                name_ingame: data[i].name_ingame,
+                                phone_number: data[i].phone_number
+                            };
+                            el.players.push(stuff)
+                        }
+                    })
+                } else {
+                    teamId.push(data[i].team_id);
+                    let stuff = {
+                        team_id: data[i].team_id,
+                        team_name: data[i].team_name,
+                        team_logo: data[i].team_logo,
+                        players: [
+                            {
+                                name: data[i].leader_name,
+                                name_ingame: data[i].leader_name_ingame,
+                                phone_number: data[i].leader_phone_number,
+                                email: data[i].leader_email,
+                                status: 'leader'
+                            },
+                            {
+                                name: data[i].name,
+                                name_ingame: data[i].name_ingame,
+                                phone_number: data[i].phone_number
+                            }
+                        ]
+                    };
+                    resultData.push(stuff);
+                }
+            }
+            
+            res.send(resultData);
+        } catch(err) {
+            next(err);
+        }
+
     } else if (req.params.event === 'talkshow') {
         db('talkshow-rev')
             .select()
