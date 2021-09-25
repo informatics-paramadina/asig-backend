@@ -1,6 +1,7 @@
 const { PDFDocument, StandardFonts, rgb, degrees, PageSizes } = require("pdf-lib");
 const axios = require('axios');
 const fs = require('fs');
+const db = require("../config/database");
 
 const createPdf = async () => {
     const pdfDoc = await PDFDocument.create();
@@ -39,7 +40,7 @@ const createPdf = async () => {
 //         }));
 // }
 
-const createPdfFromImg = async () => {
+const createPdfFromImg = async (name) => {
     const pdfDoc = await PDFDocument.create();
     const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
 
@@ -57,8 +58,8 @@ const createPdfFromImg = async () => {
     page.setRotation(degrees(90));
 
     const { width: textWidth, height: textHeight } = page.getSize();
-    console.log(page.getWidth(), page.getHeight());
-    page.drawText('Salam Jastok', {
+    // console.log(page.getWidth(), page.getHeight());
+    page.drawText(name, {
 		x: textWidth / 2 + 50,
         y: textHeight / 3,
 		size: 50,
@@ -77,8 +78,13 @@ const createPdfFromImg = async () => {
 	return pdfBuffer;
 }
 
-const sendPdf = (req, res, next) => {
-    createPdfFromImg()
+const sendPdf = async (req, res, next) => {
+    if (!req.body.id_pendaftaran) return res.status(406).json({status: "request not accepted!"})
+    let nameGet = await db("talkshow-rev").select("name").where({ id_pendaftaran: req.body.id_pendaftaran }).first();
+    nameGet = nameGet.name;
+    
+    if (!nameGet) return res.status(400).json({status: "user not found"}); 
+    createPdfFromImg(nameGet)
         .then(pdfBuffer => {
             res.status(200).type('pdf').send(pdfBuffer);
 	    })

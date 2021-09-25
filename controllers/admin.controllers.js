@@ -91,6 +91,47 @@ const getPlayersRev = async (req, res, next) => {
     }
 }
 
+const deleteData = (req, res, next) => {
+    if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
+
+    if (req.params.event === 'mini') {
+        db('minigame-rev')
+            .where({ id: req.body.id })
+            .del()
+            .then(total => {
+                res.status(200).json({
+                    status: "success",
+                    data_removed: total
+                })
+            })
+            .catch(error => next(error));
+    } else if (req.params.event === 'game') {
+        db('game-rev')
+            .where({ id: req.body.id })
+            .del()
+            .then(total => {
+                res.status(200).json({
+                    status: "success",
+                    data_removed: total
+                })
+            })
+            .catch(error => next(error));
+    } else if (req.params.event === 'talkshow') {
+        db('talkshow-rev')
+            .where({ id: req.body.id })
+            .del()
+            .then(total => {
+                res.status(200).json({
+                    status: "success",
+                    data_removed: total
+                })
+            })
+            .catch(error => next(error));
+    } else {
+        next();
+    }
+}
+
 const blastDelay = async (time) => {
     return new Promise(resolve => setTimeout(resolve, time));
 }
@@ -566,6 +607,7 @@ module.exports = {
     getPlayersRev,
     getPlayersByTeamRev,
     getTeamsRev,
+    deleteData,
     blastWARev,
     blastEmail,
     getLogs
