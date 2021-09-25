@@ -36,7 +36,7 @@ router.get('/data/team', getTeamsRev);
 router.get('/data/team/:id', getPlayersByTeamRev);
 router.get('/data/schedule/:event', authMiddleware, getSchedule);
 router.get('/data/player/:event', getPlayersRev);
-router.get('/data/delete/:event', deleteData);
+router.delete('/data/delete/:event', deleteData);
 
 router.post('/blast/wa/:event', blastWARev);
 router.post('/blast/email', authMiddleware, adminMiddleware, blastEmail);
