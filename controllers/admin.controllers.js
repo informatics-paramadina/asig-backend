@@ -146,6 +146,8 @@ const blastWARev = async (req, res, next) => {
         // let promises = [];
         const participants = await db('talkshow-rev').select('email', 'phone_number', 'name');
 
+        res.send('ok');
+
         for (let i=0; i<participants.length; i++) {
             try {
                 let res = await axios({
@@ -182,13 +184,14 @@ const blastWARev = async (req, res, next) => {
             await blastDelay(3000);
         }
 
-        res.send('ok');
     } else if (req.params.event === 'mini') {
         if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
         // let failed = [];
         // let success = [];
         // let promises = [];
         const participants = await db('minigame-rev').select('email', 'phone_number', 'name');
+
+        res.send('ok');
 
         for (let i=0; i<participants.length; i++) {
             try {
@@ -226,13 +229,14 @@ const blastWARev = async (req, res, next) => {
             await blastDelay(3000);
         }
         
-        res.send('ok');
     } else if (req.params.event === 'game') {
         if (!req.body.message) return res.status(406).json({status: "message not accepted!"}) 
         // let failed = [];
         // let success = [];
         // let promises = [];
         const participants = await db('game-rev').select('leader_email', 'leader_phone_number', 'leader_name');
+
+        res.send('ok');
 
         for (let i=0; i<participants.length; i++) {
             try {
@@ -270,7 +274,6 @@ const blastWARev = async (req, res, next) => {
             await blastDelay(3000);
         }
         
-        res.send('ok');
     } else {
         next();
     }

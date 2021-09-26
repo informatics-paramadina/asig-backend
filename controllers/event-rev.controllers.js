@@ -93,50 +93,44 @@ const registerTalkshow = async (req, res, next) => {
 
     if (checkEmail.length > 0 || checkPhone.length > 0) return res.status(400).json({status: "user has already registered to attend the talkshow"})
 
-    db('talkshow-rev')
-        .insert({
-            id_pendaftaran: Date.now() + "" + Math.floor(Math.random() * 10),
-            email: req.body.email,
-            phone_number: req.body.phone_number.replace(/^[+]/, '').replace(/^0/, '62'),
-            name: req.body.name,
-            instansi: req.body.instansi,
-            pekerjaan: req.body.pekerjaan,
-            nim: req.body.nim ? req.body.nim : null
-        })
-        .then((id) => {
-            db('talkshow-rev')
-                .where({ id: id[0] })
-                .select('phone_number', 'id_pendaftaran')
-                .first()
-                .then(data => {
-                    axios({
-                        url: 'https://wa.bot.ghifar.dev/sendText',
-                        data: JSON.stringify({
-                            "user_id": process.env.WA_ID,
-                            "number": data.phone_number,
-                            "message": "Terima kasih telah mendaftar Talkshow ASIG 14!\n\n" 
-                            + "ID Pendaftaran Anda: " + data.id_pendaftaran + "\n\n"
-                            + "Simpan ID Pendaftaran sebagai langkah untuk memverifikasi presensi Anda dalam Talkshow."
-                        }),
-                        method: 'post',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            "Authorization": process.env.WA_AUTH
-                        }
-                    }).then((response) => {
-                        res.status(201).json({
-                            status: response.data.status,
-                            uuid: data.id_pendaftaran
-                        });
-                    }).catch(() => {
-                        res.status(400).json({
-                            status: "send otp via wa gagal!",
-                            uuid: data.id_pendaftaran
-                        });
-                    })
-                })
-        })
-        .catch(error => next(error));
+    let idDaftar = Date.now() + "" + Math.floor(Math.random() * 10);
+
+    axios({
+        url: 'https://wa.bot.ghifar.dev/sendText',
+        data: JSON.stringify({
+            "user_id": process.env.WA_ID,
+            "number": req.body.phone_number.replace(/^[+]/, '').replace(/^0/, '62'),
+            "message": "Terima kasih telah mendaftar Talkshow ASIG 14!\n\n" 
+            + "ID Pendaftaran Anda: " + idDaftar + "\n\n"
+            + "Simpan ID Pendaftaran sebagai langkah untuk memverifikasi presensi Anda dalam Talkshow."
+        }),
+        method: 'post',
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": process.env.WA_AUTH
+        }
+    }).then(() => {
+        db('talkshow-rev')
+            .insert({
+                id_pendaftaran: idDaftar,
+                email: req.body.email,
+                phone_number: req.body.phone_number.replace(/^[+]/, '').replace(/^0/, '62'),
+                name: req.body.name,
+                instansi: req.body.instansi,
+                pekerjaan: req.body.pekerjaan,
+                nim: req.body.nim ? req.body.nim : null
+            })
+            .then(() => {
+                res.status(200).json({
+                    status: "success"
+                });
+            })
+            .catch(error => next(error));
+    }).catch(() => {
+        res.status(400).json({
+            status: "Nomor WA salah!"
+        });
+    })
 }
 
 module.exports = {
