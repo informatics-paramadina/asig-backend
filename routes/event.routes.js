@@ -16,11 +16,11 @@ const {
     blastWARev,
     blastEmail,
     getPlayersByTeamRev,
-    getLogs,
-    deleteData
+    getLogs
 } = require('../controllers/admin.controllers');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth.middleware');
 const upload = require('../middleware/upload.middleware');
+const { deleteData, editData } = require('../controllers/crud.controllers');
 const router = express.Router();
 
 router.post('/test-upload', upload.single('logo'), uploadLogo);
@@ -37,6 +37,7 @@ router.get('/data/team/:id', getPlayersByTeamRev);
 router.get('/data/schedule/:event', authMiddleware, getSchedule);
 router.get('/data/player/:event', getPlayersRev);
 router.delete('/data/delete/:event', deleteData);
+router.put('/data/edit/:event', editData);
 
 router.post('/blast/wa/:event', blastWARev);
 router.post('/blast/email', authMiddleware, adminMiddleware, blastEmail);

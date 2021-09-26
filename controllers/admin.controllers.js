@@ -26,15 +26,63 @@ const getPlayersRev = async (req, res, next) => {
     if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
 
     if (req.params.event === 'mini') {
-        db('minigame-rev')
-            .select()
-            .then(row => res.send(row))
-            .catch(err => next(err));
+        if (req.query.phone_number) {
+            db('minigame-rev')
+                .where('phone_number', 'like', `${req.query.phone_number}%`)
+                .select()
+                .then(row => res.send(row))
+                .catch(err => next(err));
+        } else if (req.query.email) {
+            db('minigame-rev')
+                .where('email', 'like', `${req.query.email}%`)
+                .select()
+                .then(row => res.send(row))
+                .catch(err => next(err));
+        } else if (req.query.name_ingame) {
+            db('minigame-rev')
+                .where('name_ingame', 'like', `%${req.query.name_ingame}%`)
+                .select()
+                .then(row => res.send(row))
+                .catch(err => next(err));
+        } else if (req.query.name) {
+            db('minigame-rev')
+                .where('name', 'like', `%${req.query.name}%`)
+                .select()
+                .then(row => res.send(row))
+                .catch(err => next(err));
+        } else {
+            db('minigame-rev')
+                .select()
+                .then(row => res.send(row))
+                .catch(err => next(err));
+        }
     } else if (req.params.event === 'game') {
         try {
-            const data = await db('game-rev')
-            .join('player-rev', 'player-rev.team_id', 'game-rev.id')
-            .select();
+            let data;
+            if (req.query.team_name) {
+                data = await db('game-rev')
+                .join('player-rev', 'player-rev.team_id', 'game-rev.id')
+                .select('game-rev.id AS team_id', 'player-rev.id AS player_id',
+                'player-rev.name', 'player-rev.name_ingame', 'player-rev.phone_number',
+                'game-rev.leader_email', 'game-rev.leader_name', 'game-rev.leader_name_ingame', 'game-rev.leader_phone_number',
+                'game-rev.team_name', 'game-rev.team_logo')
+                .where('game-rev.team_name', 'like', `%${req.query.team_name}%`)
+            } else if (req.query.leader_name) {
+                data = await db('game-rev')
+                .join('player-rev', 'player-rev.team_id', 'game-rev.id')
+                .select('game-rev.id AS team_id', 'player-rev.id AS player_id',
+                'player-rev.name', 'player-rev.name_ingame', 'player-rev.phone_number',
+                'game-rev.leader_email', 'game-rev.leader_name', 'game-rev.leader_name_ingame', 'game-rev.leader_phone_number',
+                'game-rev.team_name', 'game-rev.team_logo')
+                .where('game-rev.leader_name', 'like', `%${req.query.leader_name}%`)
+            } else {
+                data = await db('game-rev')
+                .join('player-rev', 'player-rev.team_id', 'game-rev.id')
+                .select('game-rev.id AS team_id', 'player-rev.id AS player_id',
+                'player-rev.name', 'player-rev.name_ingame', 'player-rev.phone_number',
+                'game-rev.leader_email', 'game-rev.leader_name', 'game-rev.leader_name_ingame', 'game-rev.leader_phone_number',
+                'game-rev.team_name', 'game-rev.team_logo');
+            }
 
             const resultData = [];
             let teamId = [];
@@ -44,9 +92,11 @@ const getPlayersRev = async (req, res, next) => {
                     resultData.some(el => {
                         if (el.team_id === data[i].team_id) {
                             let stuff = {
+                                player_id: data[i].player_id,
                                 name: data[i].name,
                                 name_ingame: data[i].name_ingame,
-                                phone_number: data[i].phone_number
+                                phone_number: data[i].phone_number,
+                                status: 'member'
                             };
                             el.players.push(stuff)
                         }
@@ -66,9 +116,11 @@ const getPlayersRev = async (req, res, next) => {
                                 status: 'leader'
                             },
                             {
+                                player_id: data[i].player_id,
                                 name: data[i].name,
                                 name_ingame: data[i].name_ingame,
-                                phone_number: data[i].phone_number
+                                phone_number: data[i].phone_number,
+                                status: 'member'
                             }
                         ]
                     };
@@ -82,55 +134,42 @@ const getPlayersRev = async (req, res, next) => {
         }
 
     } else if (req.params.event === 'talkshow') {
-        db('talkshow-rev')
+        if (req.query.id_pendaftaran) {
+            db('talkshow-rev')
+                .where('id_pendaftaran', 'like', `${req.query.id_pendaftaran}%`)
+                .select()
+                .then(row => res.send(row))
+                .catch(err => next(err));
+        } else if (req.query.phone_number) {
+            db('talkshow-rev')
+                .where('phone_number', 'like', `${req.query.phone_number}%`)
+                .select()
+                .then(row => res.send(row))
+                .catch(err => next(err));
+        } else if (req.query.email) {
+            db('talkshow-rev')
+                .where('email', 'like', `${req.query.email}%`)
+                .select()
+                .then(row => res.send(row))
+                .catch(err => next(err));
+        } else if (req.query.name) {
+            db('talkshow-rev')
+                .where('name', 'like', `%${req.query.name}%`)
+                .select()
+                .then(row => res.send(row))
+                .catch(err => next(err));
+        } else {
+            db('talkshow-rev')
             .select()
             .then(row => res.send(row))
             .catch(err => next(err));
+        }
     } else {
         next();
     }
 }
 
-const deleteData = (req, res, next) => {
-    if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
-
-    if (req.params.event === 'mini') {
-        db('minigame-rev')
-            .where({ id: req.body.id })
-            .del()
-            .then(total => {
-                res.status(200).json({
-                    status: "success",
-                    data_removed: total
-                })
-            })
-            .catch(error => next(error));
-    } else if (req.params.event === 'game') {
-        db('game-rev')
-            .where({ id: req.body.id })
-            .del()
-            .then(total => {
-                res.status(200).json({
-                    status: "success",
-                    data_removed: total
-                })
-            })
-            .catch(error => next(error));
-    } else if (req.params.event === 'talkshow') {
-        db('talkshow-rev')
-            .where({ id: req.body.id })
-            .del()
-            .then(total => {
-                res.status(200).json({
-                    status: "success",
-                    data_removed: total
-                })
-            })
-            .catch(error => next(error));
-    } else {
-        next();
-    }
-}
+//
 
 const blastDelay = async (time) => {
     return new Promise(resolve => setTimeout(resolve, time));
@@ -610,7 +649,6 @@ module.exports = {
     getPlayersRev,
     getPlayersByTeamRev,
     getTeamsRev,
-    deleteData,
     blastWARev,
     blastEmail,
     getLogs
