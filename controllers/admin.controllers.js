@@ -26,27 +26,14 @@ const getPlayersRev = async (req, res, next) => {
     if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
 
     if (req.params.event === 'mini') {
-        if (req.query.phone_number) {
+        if (req.query.search) {
             db('minigame-rev')
-                .where('phone_number', 'like', `${req.query.phone_number}%`)
-                .select()
-                .then(row => res.send(row))
-                .catch(err => next(err));
-        } else if (req.query.email) {
-            db('minigame-rev')
-                .where('email', 'like', `${req.query.email}%`)
-                .select()
-                .then(row => res.send(row))
-                .catch(err => next(err));
-        } else if (req.query.name_ingame) {
-            db('minigame-rev')
-                .where('name_ingame', 'like', `%${req.query.name_ingame}%`)
-                .select()
-                .then(row => res.send(row))
-                .catch(err => next(err));
-        } else if (req.query.name) {
-            db('minigame-rev')
-                .where('name', 'like', `%${req.query.name}%`)
+                .where('id', 'like', `%${req.query.search}%`)
+                .orWhere('phone_number', 'like', `%${req.query.search}%`)
+                .orWhere('email', 'like', `%${req.query.search}%`)
+                .orWhere('phone_number', 'like', `%${req.query.search}%`)
+                .orWhere('name', 'like', `%${req.query.search}%`)
+                .orWhere('name_ingame', 'like', `%${req.query.search}%`)
                 .select()
                 .then(row => res.send(row))
                 .catch(err => next(err));
@@ -59,29 +46,26 @@ const getPlayersRev = async (req, res, next) => {
     } else if (req.params.event === 'game') {
         try {
             let data;
-            if (req.query.team_name) {
+            if (req.query.search) {
                 data = await db('game-rev')
-                .join('player-rev', 'player-rev.team_id', 'game-rev.id')
-                .select('game-rev.id AS team_id', 'player-rev.id AS player_id',
-                'player-rev.name', 'player-rev.name_ingame', 'player-rev.phone_number',
-                'game-rev.leader_email', 'game-rev.leader_name', 'game-rev.leader_name_ingame', 'game-rev.leader_phone_number',
-                'game-rev.team_name', 'game-rev.team_logo')
-                .where('game-rev.team_name', 'like', `%${req.query.team_name}%`)
-            } else if (req.query.leader_name) {
-                data = await db('game-rev')
-                .join('player-rev', 'player-rev.team_id', 'game-rev.id')
-                .select('game-rev.id AS team_id', 'player-rev.id AS player_id',
-                'player-rev.name', 'player-rev.name_ingame', 'player-rev.phone_number',
-                'game-rev.leader_email', 'game-rev.leader_name', 'game-rev.leader_name_ingame', 'game-rev.leader_phone_number',
-                'game-rev.team_name', 'game-rev.team_logo')
-                .where('game-rev.leader_name', 'like', `%${req.query.leader_name}%`)
+                    .join('player-rev', 'player-rev.team_id', 'game-rev.id')
+                    .select('game-rev.id AS team_id', 'player-rev.id AS player_id',
+                    'player-rev.name', 'player-rev.name_ingame', 'player-rev.phone_number',
+                    'game-rev.leader_email', 'game-rev.leader_name', 'game-rev.leader_name_ingame', 'game-rev.leader_phone_number',
+                    'game-rev.team_name', 'game-rev.team_logo')
+                    .where('team_id', 'like', `%${req.query.search}%`)
+                    .orWhere('game-rev.team_name', 'like', `%${req.query.search}%`)
+                    .orWhere('game-rev.leader_name', 'like', `%${req.query.search}%`)
+                    .orWhere('game-rev.leader_name_ingame', 'like', `%${req.query.search}%`)
+                    .orWhere('game-rev.leader_phone_number', 'like', `%${req.query.search}%`)
+                    .orWhere('game-rev.leader_email', 'like', `%${req.query.search}%`)
             } else {
                 data = await db('game-rev')
-                .join('player-rev', 'player-rev.team_id', 'game-rev.id')
-                .select('game-rev.id AS team_id', 'player-rev.id AS player_id',
-                'player-rev.name', 'player-rev.name_ingame', 'player-rev.phone_number',
-                'game-rev.leader_email', 'game-rev.leader_name', 'game-rev.leader_name_ingame', 'game-rev.leader_phone_number',
-                'game-rev.team_name', 'game-rev.team_logo');
+                    .join('player-rev', 'player-rev.team_id', 'game-rev.id')
+                    .select('game-rev.id AS team_id', 'player-rev.id AS player_id',
+                    'player-rev.name', 'player-rev.name_ingame', 'player-rev.phone_number',
+                    'game-rev.leader_email', 'game-rev.leader_name', 'game-rev.leader_name_ingame', 'game-rev.leader_phone_number',
+                    'game-rev.team_name', 'game-rev.team_logo');
             }
 
             const resultData = [];
@@ -134,27 +118,17 @@ const getPlayersRev = async (req, res, next) => {
         }
 
     } else if (req.params.event === 'talkshow') {
-        if (req.query.id_pendaftaran) {
+        if (req.query.search) {
             db('talkshow-rev')
-                .where('id_pendaftaran', 'like', `${req.query.id_pendaftaran}%`)
-                .select()
-                .then(row => res.send(row))
-                .catch(err => next(err));
-        } else if (req.query.phone_number) {
-            db('talkshow-rev')
-                .where('phone_number', 'like', `${req.query.phone_number}%`)
-                .select()
-                .then(row => res.send(row))
-                .catch(err => next(err));
-        } else if (req.query.email) {
-            db('talkshow-rev')
-                .where('email', 'like', `${req.query.email}%`)
-                .select()
-                .then(row => res.send(row))
-                .catch(err => next(err));
-        } else if (req.query.name) {
-            db('talkshow-rev')
-                .where('name', 'like', `%${req.query.name}%`)
+                .where('id', 'like', `%${req.query.search}%`)
+                .orWhere('id_pendaftaran', 'like', `%${req.query.search}%`)
+                .orWhere('phone_number', 'like', `%${req.query.search}%`)
+                .orWhere('email', 'like', `%${req.query.search}%`)
+                .orWhere('phone_number', 'like', `%${req.query.search}%`)
+                .orWhere('name', 'like', `%${req.query.search}%`)
+                .orWhere('pekerjaan', 'like', `%${req.query.search}%`)
+                .orWhere('instansi', 'like', `%${req.query.search}%`)
+                .orWhere('nim', 'like', `%${req.query.search}%`)
                 .select()
                 .then(row => res.send(row))
                 .catch(err => next(err));
