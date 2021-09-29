@@ -25,7 +25,7 @@ const editData = (req, res, next) => {
                             data: JSON.stringify({
                                 "user_id": process.env.WA_ID,
                                 "number": data.phone_number,
-                                "message": "Data Anda telah diubah!"
+                                "message": "Data kompetisi Ludo Anda telah diubah!"
                             }),
                             method: 'post',
                             headers: {
@@ -63,7 +63,7 @@ const editData = (req, res, next) => {
                             data: JSON.stringify({
                                 "user_id": process.env.WA_ID,
                                 "number": data.leader_phone_number,
-                                "message": "Data Anda telah diubah!"
+                                "message": "Data kompetisi Valorant Anda telah diubah!"
                             }),
                             method: 'post',
                             headers: {
@@ -99,7 +99,7 @@ const editData = (req, res, next) => {
                             data: JSON.stringify({
                                 "user_id": process.env.WA_ID,
                                 "number": data.phone_number,
-                                "message": "Data Anda telah diubah!"
+                                "message": "Data kompetisi Valorant Anda telah diubah!"
                             }),
                             method: 'post',
                             headers: {
@@ -138,7 +138,7 @@ const editData = (req, res, next) => {
                             data: JSON.stringify({
                                 "user_id": process.env.WA_ID,
                                 "number": data.phone_number,
-                                "message": "Data Anda telah diubah!"
+                                "message": "Data Talkshow Anda telah diubah!"
                             }),
                             method: 'post',
                             headers: {
