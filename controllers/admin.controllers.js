@@ -157,7 +157,7 @@ const blastWARev = async (req, res, next) => {
         // let failed = [];
         // let success = [];
         // let promises = [];
-        const participants = await db('talkshow-rev').select('email', 'phone_number', 'name');
+        const participants = await db('talkshow-rev').select('email', 'phone_number', 'name', 'id_pendaftaran');
 
         res.send('ok');
 
@@ -168,7 +168,7 @@ const blastWARev = async (req, res, next) => {
                     data: JSON.stringify({
                         "user_id": process.env.WA_ID,
                         "number": participants[i].phone_number,
-                        "message": req.body.message
+                        "message": req.body.message.replace('{nama}', participants[i].name).replace('{id_pendaftaran}', participants[i].id_pendaftaran)
                     }),
                     method: 'post',
                     headers: {
@@ -177,7 +177,7 @@ const blastWARev = async (req, res, next) => {
                     }
                 })
                 db('blast').insert({
-                    message: req.body.message,
+                    message: req.body.message.replace('{nama}', participants[i].name).replace('{id_pendaftaran}', participants[i].id_pendaftaran),
                     message_time: new Date(),
                     status: 'success',
                     phone_number: participants[i].phone_number,
@@ -186,7 +186,7 @@ const blastWARev = async (req, res, next) => {
                 // success.push(JSON.parse(res.config.data).number);
             } catch(res) {
                 db('blast').insert({
-                    message: req.body.message,
+                    message: req.body.message.replace('{nama}', participants[i].name).replace('{id_pendaftaran}', participants[i].id_pendaftaran),
                     message_time: new Date(),
                     status: 'failed',
                     phone_number: participants[i].phone_number,
@@ -213,7 +213,7 @@ const blastWARev = async (req, res, next) => {
                     data: JSON.stringify({
                         "user_id": process.env.WA_ID,
                         "number": participants[i].phone_number,
-                        "message": req.body.message
+                        "message": req.body.message.replace('{nama}', participants[i].name)
                     }),
                     method: 'post',
                     headers: {
@@ -222,7 +222,7 @@ const blastWARev = async (req, res, next) => {
                     }
                 })
                 db('blast').insert({
-                    message: req.body.message,
+                    message: req.body.message.replace('{nama}', participants[i].name),
                     message_time: new Date(),
                     status: 'success',
                     phone_number: participants[i].phone_number,
@@ -231,7 +231,7 @@ const blastWARev = async (req, res, next) => {
                 // success.push(JSON.parse(res.config.data).number);
             } catch(res) {
                 db('blast').insert({
-                    message: req.body.message,
+                    message: req.body.message.replace('{nama}', participants[i].name),
                     message_time: new Date(),
                     status: 'failed',
                     phone_number: participants[i].phone_number,
@@ -258,7 +258,7 @@ const blastWARev = async (req, res, next) => {
                     data: JSON.stringify({
                         "user_id": process.env.WA_ID,
                         "number": participants[i].leader_phone_number,
-                        "message": req.body.message
+                        "message": req.body.message.replace('{nama}', participants[i].leader_name)
                     }),
                     method: 'post',
                     headers: {
@@ -267,7 +267,7 @@ const blastWARev = async (req, res, next) => {
                     }
                 })
                 db('blast').insert({
-                    message: req.body.message,
+                    message: req.body.message.replace('{nama}', participants[i].leader_name),
                     message_time: new Date(),
                     status: 'success',
                     phone_number: participants[i].leader_phone_number,
@@ -276,7 +276,7 @@ const blastWARev = async (req, res, next) => {
                 // success.push(JSON.parse(res.config.data).number);
             } catch(res) {
                 db('blast').insert({
-                    message: req.body.message,
+                    message: req.body.message.replace('{nama}', participants[i].leader_name),
                     message_time: new Date(),
                     status: 'failed',
                     phone_number: participants[i].leader_phone_number,

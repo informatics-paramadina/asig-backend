@@ -1,4 +1,5 @@
 const db = require("../config/database");
+const axios = require('axios');
 
 const editData = (req, res, next) => {
     if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
@@ -13,11 +14,31 @@ const editData = (req, res, next) => {
                 ...req.body.name_ingame ? {name_ingame: req.body.name_ingame} : {},
                 updated_at: new Date() 
             })
-            .then(total => {
-                res.status(200).json({ 
-                    status: "success",
-                    data_updated: total
-                })
+            .then(() => {
+                db('minigame-rev')
+                    .where({id: req.body.id })
+                    .select('phone_number')
+                    .first()
+                    .then(data => {
+                        axios({
+                            url: 'https://wa.bot.ghifar.dev/sendText',
+                            data: JSON.stringify({
+                                "user_id": process.env.WA_ID,
+                                "number": data.phone_number,
+                                "message": "Data Anda telah diubah!"
+                            }),
+                            method: 'post',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                "Authorization": process.env.WA_AUTH
+                            }
+                        }).then(() => {
+                            res.status(200).json({
+                                status: "success"
+                            });
+                        }).catch(error => next(error));
+                    })
+                    .catch(error => next(error));
             })
             .catch(error => next(error));
     } else if (req.params.event === 'game') {
@@ -31,11 +52,31 @@ const editData = (req, res, next) => {
                 ...req.body.team_name ? {team_name: req.body.team_name} : {},
                 updated_at: new Date() 
             })
-            .then(total => {
-                res.status(200).json({ 
-                    status: "success",
-                    data_updated: total
-                })
+            .then(() => {
+                db('game-rev')
+                    .where({id: req.body.id })
+                    .select('leader_phone_number')
+                    .first()
+                    .then(data => {
+                        axios({
+                            url: 'https://wa.bot.ghifar.dev/sendText',
+                            data: JSON.stringify({
+                                "user_id": process.env.WA_ID,
+                                "number": data.leader_phone_number,
+                                "message": "Data Anda telah diubah!"
+                            }),
+                            method: 'post',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                "Authorization": process.env.WA_AUTH
+                            }
+                        }).then(() => {
+                            res.status(200).json({
+                                status: "success"
+                            });
+                        }).catch(error => next(error));
+                    })
+                    .catch(error => next(error));
             })
             .catch(error => next(error));
     } else if (req.params.event === 'game-player') {
@@ -47,11 +88,31 @@ const editData = (req, res, next) => {
                 ...req.body.name ? {name: req.body.name} : {},
                 updated_at: new Date() 
             })
-            .then(total => {
-                res.status(200).json({ 
-                    status: "success",
-                    data_updated: total
-                })
+            .then(() => {
+                db('player-rev')
+                    .where({id: req.body.id })
+                    .select('phone_number')
+                    .first()
+                    .then(data => {
+                        axios({
+                            url: 'https://wa.bot.ghifar.dev/sendText',
+                            data: JSON.stringify({
+                                "user_id": process.env.WA_ID,
+                                "number": data.phone_number,
+                                "message": "Data Anda telah diubah!"
+                            }),
+                            method: 'post',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                "Authorization": process.env.WA_AUTH
+                            }
+                        }).then(() => {
+                            res.status(200).json({
+                                status: "success"
+                            });
+                        }).catch(error => next(error));
+                    })
+                    .catch(error => next(error));
             })
             .catch(error => next(error));
     } else if (req.params.event === 'talkshow') {
@@ -66,11 +127,31 @@ const editData = (req, res, next) => {
                 ...req.body.nim ? {nim: req.body.nim} : {},
                 updated_at: new Date() 
             })
-            .then(total => {
-                res.status(200).json({ 
-                    status: "success",
-                    data_updated: total
-                })
+            .then(() => {
+                db('talkshow-rev')
+                    .where({id: req.body.id })
+                    .select('phone_number')
+                    .first()
+                    .then(data => {
+                        axios({
+                            url: 'https://wa.bot.ghifar.dev/sendText',
+                            data: JSON.stringify({
+                                "user_id": process.env.WA_ID,
+                                "number": data.phone_number,
+                                "message": "Data Anda telah diubah!"
+                            }),
+                            method: 'post',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                "Authorization": process.env.WA_AUTH
+                            }
+                        }).then(() => {
+                            res.status(200).json({
+                                status: "success"
+                            });
+                        }).catch(error => next(error));
+                    })
+                    .catch(error => next(error));
             })
             .catch(error => next(error));
     } else {
