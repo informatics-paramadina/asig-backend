@@ -113,9 +113,9 @@ const createPdfFromPdf = async (name) => {
 const sendPdf = async (req, res, next) => {
     if (!req.body.id_pendaftaran) return res.status(406).json({status: "request not accepted!"})
     let nameGet = await db("talkshow-rev").select("name").where({ id_pendaftaran: req.body.id_pendaftaran }).first();
-    nameGet = nameGet.name;
-    
     if (!nameGet) return res.status(400).json({status: "user not found"}); 
+
+    nameGet = nameGet.name;
     createPdfFromPdf(nameGet)
         .then(pdfBuffer => {
             res.status(200).type('pdf').send(pdfBuffer);
