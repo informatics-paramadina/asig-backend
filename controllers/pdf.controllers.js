@@ -112,6 +112,7 @@ const createPdfFromPdf = async (name) => {
 }
 
 const sendPdf = async (req, res, next) => {
+    if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
     if (!req.body.id_pendaftaran) return res.status(406).json({status: "request not accepted!"})
     let nameGet = await db("talkshow-rev").select("name").where({ id_pendaftaran: req.body.id_pendaftaran }).first();
     if (!nameGet) return res.status(400).json({status: "user not found"}); 

@@ -16,7 +16,8 @@ const {
     blastWARev,
     blastEmail,
     getPlayersByTeamRev,
-    getLogs
+    getLogs,
+    getIndividualPlayer
 } = require('../controllers/admin.controllers');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth.middleware');
 const upload = require('../middleware/upload.middleware');
@@ -36,6 +37,7 @@ router.get('/data/team', getTeamsRev);
 router.get('/data/team/:id', getPlayersByTeamRev);
 router.get('/data/schedule/:event', authMiddleware, getSchedule);
 router.get('/data/player/:event', getPlayersRev);
+router.get('/data/player/:event/:id', getIndividualPlayer);
 router.delete('/data/delete/:event', deleteData);
 router.put('/data/edit/:event', editData);
 

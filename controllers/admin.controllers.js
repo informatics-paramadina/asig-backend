@@ -21,6 +21,20 @@ const getPlayersByTeamRev = (req, res, next) => {
         .then(row => res.send(row))
         .catch(err => next(err));
 }
+const getIndividualPlayer = (req, res, next) => {
+    if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
+
+    if (req.params.event === 'talkshow') {
+        db('talkshow-rev')
+            .where({ id_pendaftaran: req.params.id })
+            .select()
+            .first()
+            .then(row => res.send(row))
+            .catch(err => next(err));
+    } else {
+        next();
+    }
+}
 
 const getPlayersRev = async (req, res, next) => {
     if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
@@ -625,5 +639,6 @@ module.exports = {
     getTeamsRev,
     blastWARev,
     blastEmail,
-    getLogs
+    getLogs,
+    getIndividualPlayer
 }
