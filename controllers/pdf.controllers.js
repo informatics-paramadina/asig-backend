@@ -47,7 +47,7 @@ const createPdfFromImg = async (name) => {
 
     const page = pdfDoc.addPage();
 
-    const img = fs.readFileSync('./logohimti_2.png');
+    const img = fs.readFile('./logohimti_2.png');
     const pngImage = await pdfDoc.embedPng(img);
 
     const { width, height } = pngImage.scale(1);
@@ -80,10 +80,10 @@ const createPdfFromImg = async (name) => {
 }
 
 const createPdfFromPdf = async (name) => {
-    const cert = fs.readFileSync('./cert.pdf');
+    const cert = fs.readFile('./cert.pdf');
     const pdfDoc = await PDFDocument.load(cert);
     pdfDoc.registerFontkit(fontkit);
-    const timesRomanFont = await pdfDoc.embedFont(fs.readFileSync("./Roboto-Regular.ttf"), { subset: true });
+    const customFont = await pdfDoc.embedFont(fs.readFile("./Roboto-Regular.ttf"), { subset: true });
 
     const pages = pdfDoc.getPages();
 
@@ -96,7 +96,7 @@ const createPdfFromPdf = async (name) => {
 		x: width/15,
         y: height/1.95,
 		size: 36,
-		font: timesRomanFont,
+		font: customFont,
 		color: rgb(1, 1, 1)
 	});
 
