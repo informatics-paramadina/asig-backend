@@ -80,10 +80,11 @@ const createPdfFromImg = async (name) => {
 }
 
 const createPdfFromPdf = async (name) => {
-    const cert = fs.readFile('./cert.pdf');
+    const cert = fs.readFileSync('./cert.pdf');
     const pdfDoc = await PDFDocument.load(cert);
     pdfDoc.registerFontkit(fontkit);
-    const customFont = await pdfDoc.embedFont(fs.readFile("./Roboto-Regular.ttf"), { subset: true });
+    const custom = fs.readFileSync("./Roboto-Regular.ttf");
+    const customFont = await pdfDoc.embedFont(custom, { subset: true });
 
     const pages = pdfDoc.getPages();
 
