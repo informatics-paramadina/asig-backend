@@ -1,4 +1,5 @@
 const { PDFDocument, StandardFonts, rgb, degrees, PageSizes } = require("pdf-lib");
+const fontkit = require('@pdf-lib/fontkit');
 const axios = require('axios');
 const fs = require('fs');
 const db = require("../config/database");
@@ -78,13 +79,44 @@ const createPdfFromImg = async (name) => {
 	return pdfBuffer;
 }
 
+const createPdfFromPdf = async (name) => {
+    const cert = fs.readFileSync('./cert.pdf');
+    const pdfDoc = await PDFDocument.load(cert);
+    pdfDoc.registerFontkit(fontkit);
+    const timesRomanFont = await pdfDoc.embedFont(fs.readFileSync("./Roboto-Regular.ttf"), { subset: true });
+
+    const pages = pdfDoc.getPages();
+
+    const {
+        width,
+        height
+    } = pages[0].getSize()
+    
+    pages[0].drawText(name, {
+		x: width/15,
+        y: height/1.95,
+		size: 36,
+		font: timesRomanFont,
+		color: rgb(1, 1, 1)
+	});
+
+    pdfDoc.setTitle(`e-certificate ${name} - Talkshow ASIG-14`);
+    pdfDoc.setProducer('ASIG by HIMTI Universitas Paramadina');
+    pdfDoc.setCreationDate(new Date());
+
+    const pdfBytes = await pdfDoc.save();
+    const pdfBuffer = Buffer.from(pdfBytes.buffer, 'binary');
+
+	return pdfBuffer;
+}
+
 const sendPdf = async (req, res, next) => {
     if (!req.body.id_pendaftaran) return res.status(406).json({status: "request not accepted!"})
     let nameGet = await db("talkshow-rev").select("name").where({ id_pendaftaran: req.body.id_pendaftaran }).first();
     nameGet = nameGet.name;
     
     if (!nameGet) return res.status(400).json({status: "user not found"}); 
-    createPdfFromImg(nameGet)
+    createPdfFromPdf(nameGet)
         .then(pdfBuffer => {
             res.status(200).type('pdf').send(pdfBuffer);
 	    })
