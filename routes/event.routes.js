@@ -37,7 +37,7 @@ router.get('/data/team', getTeamsRev);
 router.get('/data/team/:id', getPlayersByTeamRev);
 router.get('/data/schedule/:event', authMiddleware, getSchedule);
 router.get('/data/player/:event', getPlayersRev);
-router.get('/data/player/:event/:id', getIndividualPlayer);
+router.get('/data/details/:event/:id', getIndividualPlayer);
 router.delete('/data/delete/:event', deleteData);
 router.put('/data/edit/:event', editData);
 
