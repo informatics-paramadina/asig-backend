@@ -138,7 +138,8 @@ const registerTalkshow = async (req, res, next) => {
             "number": req.body.phone_number.replace(/^[+]/, '').replace(/^0/, '62'),
             "message": "Terima kasih telah mendaftar Talkshow ASIG 14!\n\n" 
             + "ID Pendaftaran Anda: " + idDaftar + "\n\n"
-            + "Simpan ID Pendaftaran sebagai langkah untuk memverifikasi presensi Anda dalam Talkshow."
+            + "Simpan ID Pendaftaran sebagai langkah untuk memverifikasi presensi Anda dalam Talkshow.\n\n"
+            + "*Pengingat Talkshow beserta link nya akan diberitahukan melalui nomor whatsapp ini."
         }),
         method: 'post',
         headers: {
