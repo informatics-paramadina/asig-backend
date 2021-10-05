@@ -1,5 +1,7 @@
 const db = require("../config/database");
 const axios = require('axios');
+const mailer = require('../config/mailer');
+
 
 const registerGame = async (req, res, next) => {
     if (!req.body.leader_email || !req.body.leader_phone_number || !req.body.leader_name || !req.body.leader_name_ingame) return res.status(406).json({status: "registration not accepted!"})
@@ -164,9 +166,36 @@ const registerTalkshow = async (req, res, next) => {
             })
             .catch(error => next(error));
     }).catch(() => {
-        res.status(400).json({
-            status: "Nomor WA salah!"
-        });
+
+        let teks = "Terima kasih telah mendaftar Talkshow ASIG 14!\n\n" 
+        + "ID Pendaftaran Anda: " + idDaftar + "\n\n"
+        + "Simpan ID Pendaftaran sebagai langkah untuk memverifikasi presensi Anda dalam Talkshow.\n\n"
+        + "*Pengingat Talkshow beserta link nya akan diberitahukan melalui nomor whatsapp ini."
+        
+        mailer('himti@paramadina.ac.id', req.body.email, 'Pendaftaran TALKSHOW ASIG 14', teks)
+        .then(() => {
+            db('talkshow-rev')
+            .insert({
+                id_pendaftaran: idDaftar,
+                email: req.body.email,
+                phone_number: req.body.phone_number.replace(/^[+]/, '').replace(/^0/, '62'),
+                name: req.body.name,
+                instansi: req.body.instansi,
+                pekerjaan: req.body.pekerjaan,
+                nim: req.body.nim ? req.body.nim : null
+            })
+            .then(() => {
+                res.status(200).json({
+                    status: "success"
+                });
+            })
+            .catch(error => next(error));
+        }).catch(()=>{
+            res.status(400).json({
+                status: "Nomor WA salah!"
+            });
+        })
+        
     })
 }
 
