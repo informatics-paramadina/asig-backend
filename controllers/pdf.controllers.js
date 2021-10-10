@@ -165,7 +165,7 @@ antrian1.process(async (job, done) => {
     
     createPdfFromPdf(job.data.nama)
         .then(pdfBuffer => {
-            mailer('himti@paramadina.ac.id',
+            mailer("PANITIA ASIG 14 <himti@paramadina.ac.id>",
                     job.data.email, 
                     'E-certificate Talkshow ASIG 14', 
                     teks, 
@@ -193,7 +193,7 @@ antrian2.process(async (job, done) => {
     
     createPdfFromPdf(job.data.nama)
         .then(pdfBuffer => {
-            mailer('himti@paramadina.ac.id',
+            mailer("PANITIA ASIG 14 <himti@paramadina.ac.id>",
                     job.data.email, 
                     'E-certificate Talkshow ASIG 14', 
                     teks, 
