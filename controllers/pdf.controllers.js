@@ -115,17 +115,17 @@ const createPdfFromPdf = async (name) => {
 
 const antrian1 = new Queue("antrian 1", {
     redis: {
-      port: "15629",
-      host: "redis-15629.c16.us-east-1-3.ec2.cloud.redislabs.com",
-      password: "Alghi7198254!",
+      port: "6379",
+      host: "127.0.0.1",
+      password: "A51g14m4nt4p!",
     },
 });
 
 const antrian2 =  new Queue("antrian 2", {
     redis: {
-        port: "15629",
-        host: "redis-15629.c16.us-east-1-3.ec2.cloud.redislabs.com",
-        password: "Alghi7198254!",
+        port: "6379",
+        host: "127.0.0.1",
+        password: "A51g14m4nt4p!",
     },
 });
 
