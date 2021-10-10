@@ -3,6 +3,8 @@ const fontkit = require('@pdf-lib/fontkit');
 const axios = require('axios');
 const fs = require('fs');
 const db = require("../config/database");
+const Queue = require('bull');
+const mailer = require('../config/mailer');
 
 const createPdf = async () => {
     const pdfDoc = await PDFDocument.create();
@@ -111,18 +113,84 @@ const createPdfFromPdf = async (name) => {
 	return pdfBuffer;
 }
 
+const antrian1 = new Queue("antrian 1", {
+    redis: {
+      port: "15629",
+      host: "redis-15629.c16.us-east-1-3.ec2.cloud.redislabs.com",
+      password: "Alghi7198254!",
+    },
+});
+
+const antrian2 =  new Queue("antrian 2", {
+    redis: {
+        port: "15629",
+        host: "redis-15629.c16.us-east-1-3.ec2.cloud.redislabs.com",
+        password: "Alghi7198254!",
+    },
+});
+
 const sendPdf = async (req, res, next) => {
     if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
     if (!req.body.id_pendaftaran) return res.status(406).json({status: "request not accepted!"})
-    let nameGet = await db("talkshow-rev").select("name").where({ id_pendaftaran: req.body.id_pendaftaran }).first();
+    let nameGet = await db("talkshow-rev").select("name", "email").where({ id_pendaftaran: req.body.id_pendaftaran }).first();
     if (!nameGet) return res.status(400).json({status: "user not found"}); 
 
+    emailGet = nameGet.email;
     nameGet = nameGet.name;
-    createPdfFromPdf(nameGet)
-        .then(pdfBuffer => {
-            res.status(200).type('pdf').send(pdfBuffer);
-	    })
-        .catch(error => next(error));
+
+    let rand = Math.floor(Math.random()*11);
+    console.log(rand);
+    console.log(emailGet);
+
+    if (rand % 2) {
+        console.log('antrian 1');
+        antrian1.add({nama: nameGet, email: emailGet});
+    } else {
+        console.log('antrian 2');
+        antrian2.add({nama: nameGet, email: emailGet});
+    }
+
+    res.send("ok");
 }
+
+// const delay = ms => new Promise(res => setTimeout(res, ms));
+
+antrian1.process(async (job, done) => {
+    // await delay(500);
+    console.log(job.data);
+    
+    createPdfFromPdf(job.data.nama)
+        .then(pdfBuffer => {
+            mailer('himti@paramadina.ac.id', job.data.email, 'Test Certif', 'teks', pdfBuffer, `e-certificate ${job.data.nama} - Talkshow ASIG-14.pdf`)
+                .then(() => console.log("OK"))
+                .catch(() => console.log("Gagal kirim!"))
+
+            done();
+	    })
+        .catch(error => {
+            console.log(error);
+
+            done();
+        });
+})
+
+antrian2.process(async (job, done) => {
+    // await delay(500);
+    console.log(job.data);
+    
+    createPdfFromPdf(job.data.nama)
+        .then(pdfBuffer => {
+            mailer('himti@paramadina.ac.id', job.data.email, 'Test Certif', 'teks', pdfBuffer, `e-certificate ${job.data.nama} - Talkshow ASIG-14.pdf`)
+                .then(() => console.log("OK"))
+                .catch(() => console.log("Gagal kirim!"))
+
+            done();
+        })
+        .catch(error => {
+            console.log(error);
+
+            done();
+        });
+})
 
 module.exports = sendPdf;
