@@ -158,10 +158,19 @@ const sendPdf = async (req, res, next) => {
 antrian1.process(async (job, done) => {
     // await delay(500);
     console.log(job.data);
+    let teks = "Yth. " + job.data.nama + "\n\n" 
+        + "Terima kasih telah hadir di acara Talkshow ASIG 14 yang diselenggarakan oleh HIMTI Universitas Paramadina."
+        + "Terlampir E-Sertifikat untuk acara tersebut.\n\n"
+        + "Terima kasih.";
     
     createPdfFromPdf(job.data.nama)
         .then(pdfBuffer => {
-            mailer('himti@paramadina.ac.id', job.data.email, 'Test Certif', 'teks', pdfBuffer, `e-certificate ${job.data.nama} - Talkshow ASIG-14.pdf`)
+            mailer('himti@paramadina.ac.id',
+                    job.data.email, 
+                    'E-certificate Talkshow ASIG 14', 
+                    teks, 
+                    pdfBuffer, 
+                    `e-certificate ${job.data.nama} - Talkshow ASIG-14.pdf`)
                 .then(() => console.log("OK"))
                 .catch(() => console.log("Gagal kirim!"))
 
@@ -177,15 +186,24 @@ antrian1.process(async (job, done) => {
 antrian2.process(async (job, done) => {
     // await delay(500);
     console.log(job.data);
+    let teks = "Yth. " + job.data.nama + "\n\n" 
+        + "Terima kasih telah hadir di acara Talkshow ASIG 14 yang diselenggarakan oleh HIMTI Universitas Paramadina."
+        + "Terlampir E-Sertifikat untuk acara tersebut.\n\n"
+        + "Terima kasih.";
     
     createPdfFromPdf(job.data.nama)
         .then(pdfBuffer => {
-            mailer('himti@paramadina.ac.id', job.data.email, 'Test Certif', 'teks', pdfBuffer, `e-certificate ${job.data.nama} - Talkshow ASIG-14.pdf`)
+            mailer('himti@paramadina.ac.id',
+                    job.data.email, 
+                    'E-certificate Talkshow ASIG 14', 
+                    teks, 
+                    pdfBuffer, 
+                    `e-certificate ${job.data.nama} - Talkshow ASIG-14.pdf`)
                 .then(() => console.log("OK"))
                 .catch(() => console.log("Gagal kirim!"))
 
             done();
-        })
+	    })
         .catch(error => {
             console.log(error);
 
