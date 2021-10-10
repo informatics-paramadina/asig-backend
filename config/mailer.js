@@ -8,12 +8,23 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-const mailer = async (from, to, subject, textBody)=>{
+const mailer = async (from, to, subject, textBody, content = undefined, filename = undefined)=>{
+    let attach = [];
+
+    if(content)
+    {
+        attach.push({
+            filename: filename,
+            content: content
+        })
+    }
+
     const mailOptions = {
         from: from,
         to: to,
         subject: subject,
-        text: textBody
+        text: textBody,
+        attachments: attach
     }
 
     try {
