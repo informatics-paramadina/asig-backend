@@ -1,7 +1,7 @@
 const db = require("../config/database");
 const moment = require('moment');
 const axios = require('axios');
-const nodemailer = require('nodemailer');
+const mailer = require('../config/mailer');
 
 const getTeamsRev = (req, res, next) => {
     if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
@@ -161,6 +161,43 @@ const getPlayersRev = async (req, res, next) => {
 
 const blastDelay = async (time) => {
     return new Promise(resolve => setTimeout(resolve, time));
+}
+
+const blastEmailRev = async (req, res, next) => {
+    if (req.headers.authorization !== process.env.AUTH) return res.status(403).send("forbidden");
+
+    if (req.params.event === 'talkshow') {
+        if (!req.body.message || !req.body.subject) return res.status(406).json({status: "message not accepted!"}) 
+        const participants = await db('talkshow-rev').select('email', 'phone_number', 'name', 'id_pendaftaran');
+
+        res.send('ok');
+
+        for (let i=0; i<participants.length; i++) {
+            let msg = req.body.message.replace('{nama}', participants[i].name).replace('{id_pendaftaran}', participants[i].id_pendaftaran);
+            mailer('PANITIA ASIG 14 <himti@paramadina.ac.id>', participants[i].email, req.body.subject, msg)
+                .then(() => {
+                    db('blast').insert({
+                        message: msg,
+                        message_time: new Date(),
+                        status: 'success',
+                        phone_number: participants[i].phone_number,
+                        event: 'talkshow'
+                    }).then();
+                })
+                .catch(() => {
+                    db('blast').insert({
+                        message: msg,
+                        message_time: new Date(),
+                        status: 'failed',
+                        phone_number: participants[i].phone_number,
+                        event: 'talkshow'
+                    }).then();
+                })
+            await blastDelay(3000);
+        }
+    } else {
+        next();
+    }
 }
 
 const blastWARev = async (req, res, next) => {
@@ -640,5 +677,6 @@ module.exports = {
     blastWARev,
     blastEmail,
     getLogs,
-    getIndividualPlayer
+    getIndividualPlayer,
+    blastEmailRev
 }
